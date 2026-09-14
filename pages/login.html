@@ -23,28 +23,33 @@
   <main>
 
     <section id="login-form">
-      <h1></h1>
+      <h1>로그인</h1>
 
       <div id="role-toggle">
-        <button type="button" id="role-user"></button>
-        <button type="button" id="role-admin"></button>
+        <button type="button" id="role-user" class="active">일반 사용자</button>
+        <button type="button" id="role-admin">관리자</button>
       </div>
 
       <form>
-        <label for="username"></label>
-        <input type="text" id="username">
+        <div>
+          <label for="username">아이디</label>
+          <input type="text" id="username" autocomplete="username">
+        </div>
 
-        <label for="password"></label>
-        <input type="password" id="password">
+        <div>
+          <label for="password">비밀번호</label>
+          <input type="password" id="password" autocomplete="current-password">
+        </div>
 
-        <button type="submit"></button>
+        <button type="submit">로그인</button>
       </form>
+      <p class="login-note">데모 화면입니다. 아이디·비밀번호는 아무 값이나 입력해도 선택한 권한으로 로그인됩니다.</p>
     </section>
 
   </main>
 
   <footer>
-    <p></p>
+    <p>© 2026 4ositive · AI-X 스마트 교통 및 인프라 유지관리 아카데미 미니프로젝트</p>
   </footer>
 
   <script src="../js/main.js"></script>
