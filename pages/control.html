@@ -24,64 +24,89 @@
 
     <!-- 실시간 영상 + 탐지 오버레이 -->
     <section id="live-feed">
-      <h1></h1>
+      <h1>실시간 관제 화면</h1>
       <div id="video-wrapper">
-        <video id="road-video"></video>
+        <video id="road-video" muted playsinline></video>
         <canvas id="detection-overlay"></canvas>
+        <div class="feed-status">
+          <span class="dot" id="feed-dot"></span>
+          <span id="feed-status-text">영상 연결 대기 중</span>
+        </div>
+        <div class="feed-caption" id="feed-caption">CAM-01 · 상행선 3km 지점</div>
       </div>
     </section>
 
     <!-- 탐지 결과 정보 -->
     <section id="detection-info">
-      <h2></h2>
+      <h2>최근 탐지 결과</h2>
       <table>
         <thead>
           <tr>
-            <th></th>
-            <th></th>
-            <th></th>
+            <th>시간</th>
+            <th>유형</th>
+            <th>신뢰도</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
+        <tbody id="detection-table-body">
+          <tr><td colspan="3" class="mono">데이터를 불러오는 중…</td></tr>
         </tbody>
       </table>
     </section>
 
     <!-- 알림 / 신고 -->
     <section id="alert-panel">
-      <h2></h2>
-      <ul id="alert-list">
-        <li></li>
-      </ul>
-      <button type="button" id="report-btn"></button>
+      <h2>실시간 알림</h2>
+      <ul id="alert-list"></ul>
+      <button type="button" id="report-btn" class="btn btn-primary">관제센터에 신고하기</button>
     </section>
 
     <!-- 다중 모델 비교 -->
     <section id="model-compare">
-      <h2></h2>
-      <div id="model-a"></div>
-      <div id="model-b"></div>
-      <div id="model-c"></div>
+      <h2>모델 비교</h2>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab-btn active" data-target="model-a" role="tab" aria-selected="true">RetinaNet</button>
+        <button type="button" class="tab-btn" data-target="model-b" role="tab" aria-selected="false">YOLO</button>
+        <button type="button" class="tab-btn" data-target="model-c" role="tab" aria-selected="false">DINO</button>
+      </div>
+      <div id="model-a" class="model-panel active">
+        <div class="metric-row">
+          <div class="metric"><span>차량 Precision</span><span class="bar-track"><span class="bar-fill" style="width:98%"></span></span><span class="val">0.98</span></div>
+          <div class="metric"><span>차량 Recall</span><span class="bar-track"><span class="bar-fill" style="width:11%"></span></span><span class="val">0.11</span></div>
+          <div class="metric"><span>사람 F1</span><span class="bar-track"><span class="bar-fill" style="width:2%"></span></span><span class="val">0.02</span></div>
+        </div>
+        <p class="model-note">COCO 사전학습 가중치 기준. 차량 오탐은 적지만, 실제 갓길 차량의 상당수를 놓치고 있어 재현율 개선이 필요합니다. 고공 각도 특성상 사람은 거의 잡아내지 못하는 것으로 확인됐습니다.<span class="pill">비교1·비교2 완료</span></p>
+      </div>
+      <div id="model-b" class="model-panel">
+        <div class="metric-row">
+          <div class="metric"><span>차량 Precision</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
+          <div class="metric"><span>차량 Recall</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
+          <div class="metric"><span>사람 F1</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
+        </div>
+        <p class="model-note">실시간 처리에 유리한 경량 모델로, RetinaNet과 같은 기준으로 비교 평가를 진행할 예정입니다.<span class="pill">테스트 예정</span></p>
+      </div>
+      <div id="model-c" class="model-panel">
+        <div class="metric-row">
+          <div class="metric"><span>차량 Precision</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
+          <div class="metric"><span>차량 Recall</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
+          <div class="metric"><span>사람 F1</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
+        </div>
+        <p class="model-note">Transformer 기반 탐지 모델로, 작은 객체(사람) 탐지 성능을 특히 눈여겨보고 있습니다.<span class="pill">테스트 예정</span></p>
+      </div>
     </section>
 
     <!-- 탐지 결과 로그 -->
     <section id="detection-log">
-      <h2></h2>
-      <ul></ul>
+      <h2>탐지 로그</h2>
+      <ul id="log-list"></ul>
     </section>
 
   </main>
 
-  <button id="chat-fab" type="button"></button>
-  <div id="chat-panel"></div>
+  <button id="chat-fab" type="button" aria-expanded="false" aria-controls="chat-panel"><span class="sr-only">도움말 챗봇 열기</span></button>
+  <div id="chat-panel" role="dialog" aria-label="도움말 챗봇"></div>
 
   <footer>
-    <p></p>
+    <p>© 2026 4ositive · AI-X 스마트 교통 및 인프라 유지관리 아카데미 미니프로젝트</p>
   </footer>
 
   <script src="../js/main.js"></script>
