@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>위기탈출 넘버 포</title>
+  <meta name="description" content="고속도로 CCTV 영상을 분석해 갓길 정차와 보행자 출현을 자동으로 감지하는 프로젝트, 위기탈출 넘버 포.">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -11,6 +12,7 @@
   <header>
     <div class="brand">위기탈출 넘버 포</div>
     <nav>
+      <a href="index.html">홈</a>
       <a href="pages/about.html">개요</a>
       <a href="pages/control.html">관제 화면</a>
       <a href="pages/notice.html">공지사항</a>
@@ -23,48 +25,83 @@
 
     <!-- 히어로 -->
     <section id="hero">
-      <h1></h1>
-      <p></p>
+      <div class="hero-copy">
+        <h1>갓길에 멈춰선 차량, 도로 위로 나온 사람. 그 몇 초를 놓치지 않습니다.</h1>
+        <p>위기탈출 넘버 포는 고속도로 CCTV 영상을 실시간으로 분석해 갓길 정차와 보행자 출현을 자동으로 감지하고, 2차 사고로 번지기 전에 관제사에게 알리는 프로젝트입니다.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="pages/control.html">관제 화면 보기</a>
+          <a class="btn" href="pages/about.html">프로젝트 소개</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line class="lane" x1="30" y1="250" x2="190" y2="10"></line>
+          <line class="lane" x1="370" y1="250" x2="210" y2="10"></line>
+          <circle class="node" cx="150" cy="160" r="6"></circle>
+          <circle class="node" cx="232" cy="98" r="5"></circle>
+          <circle class="node" cx="196" cy="58" r="4"></circle>
+        </svg>
+      </div>
     </section>
 
-    <!-- 관제 화면 미리보기 -->
-    <section id="control-preview">
-      <h2></h2>
-    </section>
+    <div class="preview-grid">
 
-    <!-- 프로젝트 소개 요약 -->
-    <section id="about-preview">
-      <h2></h2>
-    </section>
+      <!-- 관제 화면 미리보기 -->
+      <section id="control-preview" class="preview-card">
+        <h2>실시간 관제 화면</h2>
+        <p>차량과 사람을 탐지해 갓길 정차·보행자 출현 여부를 판정하고, 결과를 화면과 알림으로 보여줍니다.</p>
+        <div class="stat-row">
+          <div class="stat">
+            <span class="num">8건</span>
+            <span class="label">오늘 감지</span>
+          </div>
+          <div class="stat">
+            <span class="num">1대</span>
+            <span class="label">가동 카메라</span>
+          </div>
+        </div>
+        <a class="card-link" href="pages/control.html">관제 화면 전체 보기</a>
+      </section>
 
-    <!-- 공지사항 미리보기 -->
-    <section id="notice-preview">
-      <h2></h2>
-      <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
-    </section>
+      <!-- 프로젝트 소개 요약 -->
+      <section id="about-preview" class="preview-card">
+        <h2>프로젝트 소개</h2>
+        <p>4명으로 이루어진 팀 4ositive가 한 달간 진행하는 프로젝트입니다. 갓길 불법 주정차 차량과 도로 위로 나온 보행자를 객체 탐지 모델로 찾아내고, 정확도를 비교·개선하는 과정을 담고 있습니다.</p>
+        <a class="card-link" href="pages/about.html">프로젝트 소개 자세히 보기</a>
+      </section>
 
-    <!-- 게시판 미리보기 -->
-    <section id="board-preview">
-      <h2></h2>
-      <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
-    </section>
+      <!-- 공지사항 미리보기 -->
+      <section id="notice-preview" class="preview-card">
+        <h2>공지사항</h2>
+        <ul>
+          <li><a href="pages/notice.html">1차 중간 점검 회의 안내 <span class="meta">09.10</span></a></li>
+          <li><a href="pages/notice.html">라벨링 가이드라인 v1.1 업데이트 <span class="meta">09.06</span></a></li>
+          <li><a href="pages/notice.html">라즈베리파이 카메라 설치 일정 공지 <span class="meta">09.02</span></a></li>
+        </ul>
+        <a class="card-link" href="pages/notice.html">공지사항 전체 보기</a>
+      </section>
+
+      <!-- 게시판 미리보기 -->
+      <section id="board-preview" class="preview-card">
+        <h2>게시판</h2>
+        <ul>
+          <li><a href="pages/board.html">보행자 탐지 recall이 너무 낮은데 다들 어떠세요 <span class="meta">정고은</span></a></li>
+          <li><a href="pages/board.html">ROI 좌표 잡는 기준 공유합니다 <span class="meta">양소정</span></a></li>
+          <li><a href="pages/board.html">이번 주 촬영 장소 후보 정리했어요 <span class="meta">이재준</span></a></li>
+        </ul>
+        <a class="card-link" href="pages/board.html">게시판 전체 보기</a>
+      </section>
+
+    </div>
 
   </main>
 
   <!-- 챗봇 버튼 -->
-  <button id="chat-fab" type="button"></button>
-  <div id="chat-panel"></div>
+  <button id="chat-fab" type="button" aria-expanded="false" aria-controls="chat-panel"><span class="sr-only">도움말 챗봇 열기</span></button>
+  <div id="chat-panel" role="dialog" aria-label="도움말 챗봇"></div>
 
   <footer>
-    <p></p>
+    <p>© 2026 4ositive · AI-X 스마트 교통 및 인프라 유지관리 아카데미 미니프로젝트</p>
   </footer>
 
   <script src="js/main.js"></script>
