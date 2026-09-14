@@ -24,59 +24,71 @@
 
     <!-- 프로젝트 소개 -->
     <section id="project-intro">
-      <h1></h1>
-      <p></p>
+      <h1>프로젝트 소개</h1>
+      <p>고속도로 갓길에 차를 세우고 내린 사람은 지나가는 차량과 부딪힐 위험이 있고, 사고가 나면 뒤따라오던 차량이 그대로 들이받는 2차 사고로 번지기 쉽습니다. 위기탈출 넘버 포는 이 몇 초의 위험을 CCTV 영상 분석으로 먼저 잡아내, 사람이 놓치기 쉬운 상황을 관제사에게 알리는 것을 목표로 합니다.</p>
     </section>
 
     <!-- 이상상황 유형 -->
     <section id="anomaly-types">
-      <h2></h2>
-      <article>
-        <h3></h3>
-        <p></p>
-      </article>
-      <article>
-        <h3></h3>
-        <p></p>
-      </article>
+      <h2>감지 대상 이상상황</h2>
+      <div class="type-grid">
+        <article>
+          <h3>갓길 정차 차량</h3>
+          <p>갓길 영역에 일정 시간 이상 멈춰 있는 차량을 찾아냅니다. 잠깐 속도를 줄인 것인지, 실제로 멈춰 선 것인지는 정지 지속시간으로 구분합니다.</p>
+        </article>
+        <article>
+          <h3>보행자 출현</h3>
+          <p>정차한 차량에서 내려 도로 위로 나온 사람을 탐지합니다. 고공 각도 CCTV 특성상 사람이 작게 찍히기 때문에 가장 어려운 과제이기도 합니다.</p>
+        </article>
+        <article>
+          <h3>사고(충돌) 감지</h3>
+          <p>차량 간 거리가 비정상적으로 빠르게 좁혀지는지를 함께 살펴 충돌 가능성이 있는 상황을 판단합니다. 미니프로젝트에서는 판정 로직을 검증하는 단계입니다.</p>
+        </article>
+      </div>
     </section>
 
     <!-- 객체 탐지 관련 자료 -->
     <section id="detection-info">
-      <h2></h2>
-      <p></p>
+      <h2>어떻게 탐지하나요</h2>
+      <p>영상 속 차량과 사람을 먼저 찾아낸 뒤, 몇 가지 규칙을 함께 확인해서 이상상황인지 판단합니다. 객체를 찾는 데는 YOLO, DINO, RetinaNet 같은 객체 탐지 모델을 적용해보고 있으며, 사람 눈으로 라벨링한 데이터와 비교해 어떤 모델이 이 영상 각도에 더 잘 맞는지 확인하는 중입니다.</p>
+      <ul class="criteria-list">
+        <li><span class="tag">위치</span> 갓길로 지정된 영역 안에 차량이 있는가</li>
+        <li><span class="tag">시간</span> 그 자리에 일정 시간 이상 멈춰 있는가</li>
+        <li><span class="tag">객체</span> 차량 주변에 사람이 함께 검출되는가</li>
+        <li><span class="tag">거리</span> 다른 차량과의 거리가 급격히 좁혀지는가</li>
+      </ul>
     </section>
 
     <!-- 팀 소개 -->
     <section id="team">
-      <h2></h2>
+      <h2>팀 소개 · 4ositive</h2>
       <ul>
         <li>
-          <h3></h3>
-          <p></p>
+          <h3>이재준</h3>
+          <p>데이터 수집 · 라벨링 담당</p>
         </li>
         <li>
-          <h3></h3>
-          <p></p>
+          <h3>백민욱</h3>
+          <p>데이터 분석 · 발표문서 담당</p>
         </li>
         <li>
-          <h3></h3>
-          <p></p>
+          <h3>정고은</h3>
+          <p>모델 학습 · 테스트 담당</p>
         </li>
         <li>
-          <h3></h3>
-          <p></p>
+          <h3>양소정</h3>
+          <p>모델 학습 · 화면 개발 담당</p>
         </li>
       </ul>
     </section>
 
   </main>
 
-  <button id="chat-fab" type="button"></button>
-  <div id="chat-panel"></div>
+  <button id="chat-fab" type="button" aria-expanded="false" aria-controls="chat-panel"><span class="sr-only">도움말 챗봇 열기</span></button>
+  <div id="chat-panel" role="dialog" aria-label="도움말 챗봇"></div>
 
   <footer>
-    <p></p>
+    <p>© 2026 4ositive · AI-X 스마트 교통 및 인프라 유지관리 아카데미 미니프로젝트</p>
   </footer>
 
   <script src="../js/main.js"></script>
