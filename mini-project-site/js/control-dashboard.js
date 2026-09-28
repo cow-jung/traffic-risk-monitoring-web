@@ -103,9 +103,20 @@
       table.replaceChildren();
       events.slice(0, 5).forEach(function (event) {
         var row = document.createElement('tr');
-        [event.time, labels[event.type] + ' · 예시', Math.round(event.confidence * 100) + '%'].forEach(function (text) {
+        row.className = 'clickable';
+        row.addEventListener('click', function () { openDetails(event); });
+        [event.time, labels[event.type] + ' · 예시', Math.round(event.confidence * 100) + '%'].forEach(function (text, index) {
           var cell = document.createElement('td');
-          cell.textContent = text;
+          if (index === 0) {
+            var openButton = document.createElement('button');
+            openButton.type = 'button';
+            openButton.className = 'result-open';
+            openButton.textContent = text;
+            openButton.setAttribute('aria-label', event.time + ' ' + labels[event.type] + ' 탐지 상세 보기');
+            cell.append(openButton);
+          } else {
+            cell.textContent = text;
+          }
           row.append(cell);
         });
         table.append(row);
