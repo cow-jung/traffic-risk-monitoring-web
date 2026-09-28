@@ -564,6 +564,7 @@ td.mono, .mono-cell { font-family: var(--font-mono); font-size: 0.85rem; color: 
 #model-compare .tabs {
   display: flex;
   gap: 6px;
+  overflow-x: auto;
   margin-bottom: 18px;
   border-bottom: 1px solid var(--line-700);
 }
@@ -576,10 +577,24 @@ td.mono, .mono-cell { font-family: var(--font-mono); font-size: 0.85rem; color: 
   font-weight: 600;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  white-space: nowrap;
 }
 #model-compare .tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); }
 #model-compare .model-panel { display: none; }
 #model-compare .model-panel.active { display: block; }
+#model-compare .compare-intro { color: var(--fog-300); line-height: 1.6; margin-bottom: 16px; }
+#model-compare .compare-table-wrap { overflow-x: auto; border: 1px solid var(--line-700); border-radius: var(--radius-s); }
+#model-compare .compare-table { min-width: 940px; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+#model-compare .compare-table th, #model-compare .compare-table td { padding: 11px 10px; border-bottom: 1px solid var(--line-700); text-align: right; white-space: nowrap; }
+#model-compare .compare-table th:first-child { text-align: left; }
+#model-compare .compare-table thead { background: var(--asphalt-800); color: var(--fog-300); }
+#model-compare .compare-table tbody tr:last-child th, #model-compare .compare-table tbody tr:last-child td { border-bottom: 0; }
+#model-compare .compare-table .compare-candidate { background: var(--asphalt-900); }
+#model-compare .compare-table .compare-best { color: var(--safe); font-weight: 750; }
+#model-compare .compare-table .pill { color: var(--amber); border: 1px solid var(--amber-dim); border-radius: 10px; padding: 1px 6px; font-size: 0.72rem; }
+#model-compare .compare-takeaway { color: var(--fog-300); line-height: 1.65; margin-top: 15px; }
+#model-compare .compare-takeaway strong { color: var(--amber); margin-right: 7px; }
+#model-compare .compare-table-wrap + .model-note { margin-top: 12px; }
 .metric-row { display: grid; gap: 12px; margin-bottom: 14px; }
 .metric {
   display: grid;

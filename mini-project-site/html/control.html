@@ -92,39 +92,33 @@
 <section id="alert-panel">
       <h2>실시간 알림</h2>
       <ul id="alert-list"></ul>
-      <button type="button" id="report-btn" class="btn btn-primary">관제센터에 신고하기</button>
+      <button type="button" id="report-btn" class="btn btn-primary">이상상황 신고하기</button>
     </section>
 
 <section id="model-compare">
-      <h2>모델 비교</h2>
-      <div class="tabs" role="tablist">
-        <button type="button" class="tab-btn active" data-target="model-a" role="tab" aria-selected="true">RetinaNet</button>
-        <button type="button" class="tab-btn" data-target="model-b" role="tab" aria-selected="false">YOLO</button>
-        <button type="button" class="tab-btn" data-target="model-c" role="tab" aria-selected="false">DINO</button>
+      <h2>모델 비교 · 3주차 결과</h2>
+      <p class="compare-intro">낙하물(목재·상자·페트병) 모델 비교입니다. 같은 test 371장, 입력 크기 640으로 평가했습니다. 아래 수치는 서버 실시간 연결 상태를 뜻하지 않습니다.</p>
+      <div class="tabs" role="tablist" aria-label="모델 비교 방식">
+        <button type="button" class="tab-btn active" id="model-tab-a" data-target="model-a" role="tab" aria-selected="true" aria-controls="model-a">YOLO11n 정량 평가</button>
+        <button type="button" class="tab-btn" id="model-tab-b" data-target="model-b" role="tab" aria-selected="false" aria-controls="model-b">RF-DETR 정성 비교</button>
       </div>
-      <div id="model-a" class="model-panel active">
-        <div class="metric-row">
-          <div class="metric"><span>차량 Precision</span><span class="bar-track"><span class="bar-fill" style="width:98%"></span></span><span class="val">0.98</span></div>
-          <div class="metric"><span>차량 Recall</span><span class="bar-track"><span class="bar-fill" style="width:11%"></span></span><span class="val">0.11</span></div>
-          <div class="metric"><span>사람 F1</span><span class="bar-track"><span class="bar-fill" style="width:2%"></span></span><span class="val">0.02</span></div>
-        </div>
-        <p class="model-note">COCO 사전학습 가중치 기준. 차량 오탐은 적지만, 실제 갓길 차량의 상당수를 놓치고 있어 재현율 개선이 필요합니다. 고공 각도 특성상 사람은 거의 잡아내지 못하는 것으로 확인됐습니다.<span class="pill">비교1·비교2 완료</span></p>
+      <div id="model-a" class="model-panel active" role="tabpanel" aria-labelledby="model-tab-a">
+        <div class="compare-table-wrap"><table class="compare-table">
+          <thead><tr><th scope="col">모델</th><th scope="col">전체 P</th><th scope="col">전체 R</th><th scope="col">전체 mAP50</th><th scope="col">전체 mAP50-95</th><th scope="col">wood R</th><th scope="col">wood mAP50</th><th scope="col">wood 오탐 / 미탐</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">팀 YOLO11n · 88 epoch</th><td>0.838</td><td>0.741</td><td class="compare-best">0.805</td><td class="compare-best">0.620</td><td>0.489</td><td>0.601</td><td>149 / 206</td></tr>
+            <tr class="compare-candidate"><th scope="row">Alope · 121 epoch</th><td>0.827</td><td>0.732</td><td>0.796</td><td>0.602</td><td>0.505</td><td>0.601</td><td>156 / 188</td></tr>
+            <tr class="compare-candidate"><th scope="row">Alope · 151 epoch <span class="pill">후보</span></th><td>0.828</td><td class="compare-best">0.750</td><td>0.798</td><td>0.608</td><td class="compare-best">0.541</td><td class="compare-best">0.604</td><td>151 / 192</td></tr>
+            <tr class="compare-candidate"><th scope="row">Alope · 181 epoch</th><td>0.827</td><td>0.729</td><td>0.792</td><td>0.611</td><td>0.491</td><td>0.593</td><td>133 / 204</td></tr>
+          </tbody>
+        </table></div>
+        <p class="model-note">전체 P·R·mAP: Ultralytics val(test split). wood 오탐·미탐: confidence 0.25, IoU 0.5 기준 건수. Alope 181의 오탐 건수가 가장 적고, Alope 121의 미탐 건수가 가장 적습니다.</p>
+        <p class="compare-takeaway"><strong>3주차 선택 근거</strong> 팀 88의 전체 mAP50은 0.805로 가장 높습니다. Alope 151은 wood 재현율이 0.489 → 0.541로 높아 다음 적용 후보입니다. 서버의 모델 교체는 4주차 계획입니다.</p>
+        <p class="compare-takeaway"><strong>wood 임계값 분석</strong> Alope 151의 confidence를 0.25 → 0.30으로 올리면 오탐 151 → 115건, 미탐 192 → 200건입니다. 발표 자료는 0.30에서 F1 0.624를 보고합니다. 실제 서버 반영은 이후 검증 단계입니다.</p>
       </div>
-      <div id="model-b" class="model-panel">
-        <div class="metric-row">
-          <div class="metric"><span>차량 Precision</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
-          <div class="metric"><span>차량 Recall</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
-          <div class="metric"><span>사람 F1</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
-        </div>
-        <p class="model-note">실시간 처리에 유리한 경량 모델로, RetinaNet과 같은 기준으로 비교 평가를 진행할 예정입니다.<span class="pill">테스트 예정</span></p>
-      </div>
-      <div id="model-c" class="model-panel">
-        <div class="metric-row">
-          <div class="metric"><span>차량 Precision</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
-          <div class="metric"><span>차량 Recall</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
-          <div class="metric"><span>사람 F1</span><span class="bar-track"><span class="bar-fill" style="width:0%"></span></span><span class="val">-</span></div>
-        </div>
-        <p class="model-note">Transformer 기반 탐지 모델로, 작은 객체(사람) 탐지 성능을 특히 눈여겨보고 있습니다.<span class="pill">테스트 예정</span></p>
+      <div id="model-b" class="model-panel" role="tabpanel" aria-labelledby="model-tab-b">
+        <p class="compare-takeaway"><strong>RF-DETR nano · 59 epoch</strong> 같은 3,706장 데이터로 학습하고 실사진 15장을 눈으로 비교했습니다. 복잡한 장면에서 YOLO11n 88 epoch가 놓친 상자를 추가로 찾은 사례가 있습니다.</p>
+        <p class="model-note">이 결과는 15장의 정성 비교입니다. test 371장 mAP와 처리 속도 수치는 아직 제시되지 않았으며, 4주차 정량 비교 예정입니다. 신뢰도 0.2~0.4인 검출을 재확인하는 2차 모델로 활용할 계획입니다.</p>
       </div>
     </section>
 
