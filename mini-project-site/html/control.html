@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <script>try { if (localStorage.getItem('mini-project-theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (error) { /* 기본 다크 모드 */ }</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="주정차·역주행 및 낙하물 관제 대시보드">
-  <title>미니프로젝트 관제 대시보드 | 위기탈출 넘버 포</title>
+  <meta name="description" content="주정차·역주행 및 낙하물 대시보드">
+  <title>미니프로젝트 대시보드 | 위기탈출 넘버 포</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/control-dashboard.css">
 </head>
@@ -14,27 +15,27 @@
     <nav aria-label="주 메뉴">
       <a href="index.html">홈</a>
       <a href="about.html">개요</a>
-      <a href="control.html">관제 화면</a>
+      <a href="control.html">대시보드</a>
     </nav>
   </header>
 
   <main id="dashboard">
     <div class="dash-heading">
-      <div><p class="eyebrow">CONTROL CENTER / 관제 화면</p><h1>도로 이상상황 관제</h1><p id="dash-subtitle">카메라 2대 · 주정차 및 역주행</p></div>
+      <div><p class="eyebrow">DASHBOARD / 대시보드</p><h1>도로 이상상황 대시보드</h1><p id="dash-subtitle">카메라 2대 · 주정차 및 역주행</p></div>
       <div class="dash-actions"><span class="demo-label">탐지 기록: 예시</span><button class="btn btn-primary" id="add-demo" type="button">예시 탐지 발생</button><button class="btn" id="reset-demo" type="button">예시 초기화</button></div>
     </div>
 
-    <div class="dash-tabs" role="tablist" aria-label="관제 유형">
+    <div class="dash-tabs" role="tablist" aria-label="대시보드 유형">
       <button id="tab-traffic" class="dash-tab" type="button" role="tab" aria-selected="true" aria-controls="dash-panel" data-view="traffic">주정차·역주행</button>
       <button id="tab-objects" class="dash-tab" type="button" role="tab" aria-selected="false" aria-controls="dash-panel" data-view="objects" tabindex="-1">낙하물</button>
     </div>
 
     <div id="dash-panel" role="tabpanel" aria-labelledby="tab-traffic">
-      <div class="dash-summary" aria-label="관제 요약">
+      <div class="dash-summary" aria-label="대시보드 요약">
         <div class="summary-card"><span id="source-label">연결된 카메라</span><strong id="source-count">0 <small>/ 2대</small></strong></div>
         <div class="summary-card"><span id="count-label">차량 이상 탐지</span><strong id="detection-count"></strong></div>
         <div class="summary-card"><span>최근 탐지</span><strong id="latest-event"></strong></div>
-        <div class="summary-card"><span>관제 상태</span><strong id="system-state">연결 대기</strong></div>
+        <div class="summary-card"><span>연결 상태</span><strong id="system-state">연결 대기</strong></div>
       </div>
 
       <div class="dash-grid">
@@ -136,6 +137,7 @@
 
   <dialog id="event-dialog" class="event-dialog" aria-labelledby="event-title"><div class="dialog-head"><h2 id="event-title">탐지 상세</h2><button id="close-dialog" type="button" class="btn btn-small" aria-label="상세 창 닫기">닫기</button></div><div class="dialog-body"><div id="event-media" class="event-media"></div><dl id="event-details" class="event-details"></dl><p id="event-reason" class="event-reason"></p><p class="dialog-note">예시 기록입니다. 실제 모델 판정 결과가 아닙니다.</p></div></dialog>
 
+  <button id="theme-toggle" type="button" aria-label="밝은 모드로 전환" aria-pressed="false" title="밝은 모드로 전환">☀</button>
   <button id="chat-fab" type="button" aria-expanded="false" aria-controls="chat-panel"><span class="sr-only">도움말 챗봇 열기</span></button>
   <div id="chat-panel" role="dialog" aria-label="도움말 챗봇"></div>
   <footer><p>© 2026 4ositive · AI-X 스마트 교통 및 인프라 유지관리 아카데미 미니프로젝트</p></footer>

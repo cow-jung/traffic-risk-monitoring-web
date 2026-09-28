@@ -1,6 +1,6 @@
 /* ==========================================================================
    위기탈출 넘버 포 — 전체 스타일시트
-   컨셉: 고속도로 관제센터. 짙은 아스팔트 배경 + 표지판 앰버 포인트,
+   컨셉: 고속도로 상황실. 짙은 아스팔트 배경 + 표지판 앰버 포인트,
         점선 차선을 구획선 모티프로 사용.
    ========================================================================== */
 
@@ -41,6 +41,33 @@
   --radius-s: 3px;
   --radius-m: 6px;
 }
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --asphalt-950: #f4f7fa;
+  --asphalt-900: #ffffff;
+  --asphalt-800: #e9eff4;
+  --asphalt-700: #dce5ec;
+  --asphalt-600: #b8c8d5;
+  --line-700: #cedbe5;
+  --fog-100: #172633;
+  --fog-300: #304658;
+  --fog-500: #536879;
+  --fog-700: #607588;
+  --amber: #a45e00;
+  --amber-dim: #ba873b;
+  --amber-glow: rgba(164, 94, 0, 0.12);
+  --danger: #bf3049;
+  --caution: #a45e00;
+  --safe: #087b54;
+}
+html[data-theme="light"] header { background: rgba(244, 247, 250, 0.92); }
+html[data-theme="light"] #video-wrapper { background: linear-gradient(160deg, var(--asphalt-800), var(--asphalt-950) 70%); }
+html[data-theme="light"] .feed-status { background: rgba(255, 255, 255, 0.88); color: var(--fog-300); }
+html[data-theme="light"] .btn-primary,
+html[data-theme="light"] nav a.active,
+html[data-theme="light"] .chat-msg.user { color: #fff; }
+html[data-theme="light"] .btn-primary:hover { background: #874e00; border-color: #874e00; }
 
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -733,12 +760,30 @@ body.role-admin [data-admin-only] { display: inline-flex; }
 #chat-fab::before { content: "?"; }
 #chat-fab[aria-expanded="true"]::before { content: "×"; font-size: 1.6rem; }
 
-#chat-panel {
+#theme-toggle {
   position: fixed;
   right: 24px;
   bottom: 88px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--amber-dim);
+  background: var(--asphalt-900);
+  color: var(--amber);
+  font-size: 1.45rem;
+  line-height: 1;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+  z-index: 50;
+}
+#theme-toggle:hover { background: var(--asphalt-800); }
+#theme-toggle:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+#chat-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 152px;
   width: 300px;
-  max-height: 420px;
+  max-height: min(420px, calc(100dvh - 168px));
   background: var(--asphalt-900);
   border: 1px solid var(--line-700);
   border-radius: var(--radius-m);
@@ -832,4 +877,5 @@ footer {
   #team ul { grid-template-columns: 1fr; }
   #chat-panel { width: calc(100vw - 32px); right: 16px; }
   #chat-fab { right: 16px; }
+  #theme-toggle { right: 16px; }
 }

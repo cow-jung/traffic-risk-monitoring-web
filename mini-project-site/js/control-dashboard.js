@@ -1,4 +1,4 @@
-/* 관제 대시보드: 로컬 매체 미리보기와 예시 탐지 기록.
+/* 대시보드: 로컬 매체 미리보기와 예시 탐지 기록.
    실제 탐지 결과는 이후 서버 API 연결 시 이 예시 데이터 대신 공급합니다. */
 (function () {
   'use strict';
@@ -35,13 +35,13 @@
     if (source.kind === 'youtube') {
       element = document.createElement('iframe');
       element.src = 'https://www.youtube-nocookie.com/embed/' + source.youtube + (source.start ? '?start=' + source.start : '');
-      element.title = '관제 영상';
+      element.title = '영상 미리보기';
       element.allow = 'autoplay; encrypted-media; picture-in-picture';
       element.allowFullscreen = true;
     } else if (source.kind === 'image') {
       element = document.createElement('img');
       element.src = source.url;
-      element.alt = detail ? '탐지 기록에 연결된 사진' : '관제할 사진';
+      element.alt = detail ? '탐지 기록에 연결된 사진' : '선택한 사진';
       element.onerror = function () { $('source-error').textContent = '사진을 불러올 수 없습니다. 링크와 접근 권한을 확인해 주세요.'; };
     } else {
       element = document.createElement('video');
@@ -94,7 +94,7 @@
   }
 
   function renderLegacy() {
-    // 기존 하단 목록을 새 관제 기록과 같은 데이터로 표시합니다.
+    // 기존 하단 목록을 새 탐지 기록과 같은 데이터로 표시합니다.
     var events = records[view];
     var table = $('detection-table-body');
     var alerts = $('alert-list');
@@ -182,7 +182,7 @@
     $('source-label').textContent = view === 'traffic' ? '연결된 카메라' : '선택한 매체';
     $('source-count').innerHTML = view === 'traffic' ? '0 <small>/ 2대</small>' : (media ? '1 <small>개</small>' : '0 <small>개</small>');
     $('system-state').textContent = view === 'traffic' ? '연결 대기' : (media ? '매체 확인 중' : '매체 대기');
-    $('dash-subtitle').textContent = view === 'traffic' ? '카메라 2대 · 주정차 및 역주행' : '영상 링크 또는 사진·영상 파일 · 낙하물 관제';
+    $('dash-subtitle').textContent = view === 'traffic' ? '카메라 2대 · 주정차 및 역주행' : '영상 링크 또는 사진·영상 파일 · 낙하물 대시보드';
     $('monitor-title').textContent = view === 'traffic' ? '카메라 화면' : '영상·사진 확인';
     $('monitor-status').textContent = view === 'traffic' ? '라즈베리 파이 연결 전' : '자동 탐지 모델 연결 전';
     $('traffic-view').hidden = view !== 'traffic';
@@ -309,7 +309,7 @@
       note.setAttribute('role', 'status');
       $('report-btn').after(note);
     }
-    note.textContent = '현재는 예시 관제 화면입니다. 신고 전송은 서버 연결 후 사용할 수 있습니다.';
+    note.textContent = '현재는 예시 대시보드입니다. 신고 전송은 서버 연결 후 사용할 수 있습니다.';
   });
   window.addEventListener('pagehide', function () { localUrls.forEach(function (url) { URL.revokeObjectURL(url); }); });
   render();
