@@ -93,6 +93,52 @@
     $('type-filter').replaceChildren.apply($('type-filter'), options.map(function (pair) { return new Option(pair[1], pair[0]); }));
   }
 
+  function renderLegacy() {
+    // 기존 하단 목록을 새 관제 기록과 같은 데이터로 표시합니다.
+    var events = records[view];
+    var table = $('detection-table-body');
+    var alerts = $('alert-list');
+    var log = $('log-list');
+    if (table) {
+      table.replaceChildren();
+      events.slice(0, 5).forEach(function (event) {
+        var row = document.createElement('tr');
+        [event.time, labels[event.type] + ' · 예시', Math.round(event.confidence * 100) + '%'].forEach(function (text) {
+          var cell = document.createElement('td');
+          cell.textContent = text;
+          row.append(cell);
+        });
+        table.append(row);
+      });
+    }
+    if (alerts) {
+      alerts.replaceChildren();
+      events.slice(0, 4).forEach(function (event) {
+        var item = document.createElement('li');
+        var label = document.createElement('span');
+        var time = document.createElement('span');
+        label.textContent = labels[event.type] + ' · 예시' + (event.camera ? ' · ' + event.camera : '');
+        time.className = 'alert-time';
+        time.textContent = event.time;
+        item.append(label, time);
+        alerts.append(item);
+      });
+    }
+    if (log) {
+      log.replaceChildren();
+      events.forEach(function (event) {
+        var item = document.createElement('li');
+        var time = document.createElement('span');
+        var text = document.createElement('span');
+        time.className = 't';
+        time.textContent = event.time;
+        text.textContent = labels[event.type] + ' · 신뢰도 ' + Math.round(event.confidence * 100) + '% · 예시';
+        item.append(time, text);
+        log.append(item);
+      });
+    }
+  }
+
   function render() {
     fillTypeFilter();
     var events = records[view];
@@ -152,6 +198,7 @@
       tab.tabIndex = selected ? 0 : -1;
     });
     $('dash-panel').setAttribute('aria-labelledby', view === 'traffic' ? 'tab-traffic' : 'tab-objects');
+    renderLegacy();
   }
 
   function openDetails(event) {
@@ -241,6 +288,29 @@
   });
   $('close-dialog').addEventListener('click', function () { $('event-dialog').close(); });
   $('event-dialog').addEventListener('close', function () { $('event-media').replaceChildren(); });
+  document.querySelectorAll('#model-compare .tab-btn').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('#model-compare .tab-btn').forEach(function (button) {
+        button.classList.remove('active');
+        button.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('#model-compare .model-panel').forEach(function (panel) { panel.classList.remove('active'); });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      $(tab.dataset.target).classList.add('active');
+    });
+  });
+  $('report-btn').addEventListener('click', function () {
+    var note = $('report-status');
+    if (!note) {
+      note = document.createElement('p');
+      note.id = 'report-status';
+      note.className = 'source-hint';
+      note.setAttribute('role', 'status');
+      $('report-btn').after(note);
+    }
+    note.textContent = '현재는 예시 관제 화면입니다. 신고 전송은 서버 연결 후 사용할 수 있습니다.';
+  });
   window.addEventListener('pagehide', function () { localUrls.forEach(function (url) { URL.revokeObjectURL(url); }); });
   render();
 })();

@@ -62,6 +62,10 @@
 #dashboard .criteria-tags span { border: 1px solid var(--amber-dim); color: var(--amber); border-radius: var(--radius-s); padding: 3px 7px; font-size: 0.75rem; }
 #dashboard .dash-disclaimer { color: var(--fog-500); font-size: 0.8rem; line-height: 1.6; margin-top: 18px; }
 #dashboard .dash-disclaimer strong { color: var(--amber); }
+#dashboard .legacy-panels { margin-top: 24px; }
+#dashboard .legacy-panels section { padding: 38px 0; }
+#dashboard .legacy-panels h2 { font-size: 1.35rem; }
+#dashboard #alert-panel .empty { color: var(--fog-500); }
 .event-dialog { width: min(720px, calc(100vw - 28px)); max-height: 90vh; background: var(--asphalt-900); color: var(--fog-100); border: 1px solid var(--asphalt-600); border-radius: var(--radius-m); padding: 0; box-shadow: 0 25px 80px #000a; }
 .event-dialog::backdrop { background: #05080bc9; }
 .event-dialog .dialog-head { display: flex; justify-content: space-between; align-items: center; padding: 15px 18px; border-bottom: 1px solid var(--line-700); }
