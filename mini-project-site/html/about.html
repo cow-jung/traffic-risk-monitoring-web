@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>개요 | 위기탈출 넘버 포</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <header>
+    <div class="brand">위기탈출 넘버 포</div>
+    <nav aria-label="주 메뉴">
+      <a href="index.html">홈</a>
+      <a href="about.html">개요</a>
+      <a href="control.html">관제 화면</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- 프로젝트 소개 -->
+    <section id="project-intro">
+      <h1>프로젝트 소개</h1>
+      <p>도로의 주정차·역주행과 낙하물을 구분해 관제하는 미니프로젝트입니다. 주정차 화면은 카메라 연결을 준비하고, 낙하물 화면은 영상 링크 또는 업로드한 사진·영상으로 관제 흐름을 확인할 수 있습니다. 실제 자동 탐지 연동 전까지 화면의 기록은 예시입니다.</p>
+    </section>
+
+    <!-- 이상상황 유형 -->
+    <section id="anomaly-types">
+      <h2>감지 대상 이상상황</h2>
+      <div class="type-grid">
+        <article>
+          <h3>주정차 차량</h3>
+          <p>지정 구역에서 차량이 일정 시간 이상 정차한 상황을 확인하도록 계획하고 있습니다.</p>
+        </article>
+        <article>
+          <h3>역주행</h3>
+          <p>차량 이동 방향이 해당 구간의 지정 진행 방향과 반대인지 확인하도록 계획하고 있습니다.</p>
+        </article>
+        <article>
+          <h3>도로 낙하물</h3>
+          <p>직접 학습한 모델로 목재(wood), 상자(box), 페트병(pet) 세 종류를 구분하는 것을 목표로 합니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 객체 탐지 관련 자료 -->
+    <section id="detection-info">
+      <h2>어떻게 탐지하나요</h2>
+      <p>주정차·역주행은 차량의 위치·움직임을 기준으로 판단할 예정입니다. 낙하물은 목재·상자·페트병 이미지로 학습한 YOLO 모델의 탐지 결과를 연동할 계획입니다. 현재 화면은 아직 모델과 연결되지 않았습니다.</p>
+      <ul class="criteria-list">
+        <li><span class="tag">위치</span> 주정차 판정 구역 안에 차량이 있는가</li>
+        <li><span class="tag">시간</span> 차량이 일정 시간 이상 정차했는가</li>
+        <li><span class="tag">객체</span> 목재·상자·페트병 객체가 검출되는가</li>
+        <li><span class="tag">방향</span> 차량 이동 방향이 지정 진행 방향과 일치하는가</li>
+      </ul>
+    </section>
+
+    <!-- 팀 소개 -->
+    <section id="team">
+      <h2>팀 소개 · 4ositive</h2>
+      <ul>
+        <li>
+          <h3>이재준</h3>
+          <p>데이터 수집 · 라벨링 담당</p>
+        </li>
+        <li>
+          <h3>백민욱</h3>
+          <p>데이터 분석 · 발표문서 담당</p>
+        </li>
+        <li>
+          <h3>정고은</h3>
+          <p>모델 학습 · 테스트 담당</p>
+        </li>
+        <li>
+          <h3>양소정</h3>
+          <p>모델 학습 · 화면 개발 담당</p>
+        </li>
+      </ul>
+    </section>
+
+  </main>
+
+  <button id="chat-fab" type="button" aria-expanded="false" aria-controls="chat-panel"><span class="sr-only">도움말 챗봇 열기</span></button>
+  <div id="chat-panel" role="dialog" aria-label="도움말 챗봇"></div>
+
+  <footer>
+    <p>© 2026 4ositive · AI-X 스마트 교통 및 인프라 유지관리 아카데미 미니프로젝트</p>
+  </footer>
+
+  <script src="../js/site.js"></script>
+</body>
+</html>

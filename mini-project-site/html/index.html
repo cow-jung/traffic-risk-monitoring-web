@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>위기탈출 넘버 포</title>
+  <meta name="description" content="주정차·역주행 및 도로 낙하물을 구분해 보여주는 미니프로젝트 관제 화면.">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <header>
+    <div class="brand">위기탈출 넘버 포</div>
+    <nav aria-label="주 메뉴">
+      <a href="index.html">홈</a>
+      <a href="about.html">개요</a>
+      <a href="control.html">관제 화면</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- 히어로 -->
+    <section id="hero">
+      <div class="hero-copy">
+        <h1>도로 위 이상상황을 한 화면에서 확인합니다.</h1>
+        <p>주정차·역주행과 목재·상자·페트병 낙하물을 구분해 보여주는 미니프로젝트 관제 화면입니다. 현재 화면의 탐지 기록은 예시이며 실제 모델 연결은 진행 전입니다.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="control.html">관제 화면 보기</a>
+          <a class="btn" href="about.html">프로젝트 소개</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line class="lane" x1="30" y1="250" x2="190" y2="10"></line>
+          <line class="lane" x1="370" y1="250" x2="210" y2="10"></line>
+          <circle class="node" cx="150" cy="160" r="6"></circle>
+          <circle class="node" cx="232" cy="98" r="5"></circle>
+          <circle class="node" cx="196" cy="58" r="4"></circle>
+        </svg>
+      </div>
+    </section>
+
+    <div class="preview-grid">
+
+      <!-- 관제 화면 미리보기 -->
+      <section id="control-preview" class="preview-card">
+        <h2>실시간 관제 화면</h2>
+        <p>주정차·역주행과 낙하물 관제를 탭으로 전환하고, 기록을 선택해 상세 이유와 연결된 매체를 확인합니다.</p>
+        <div class="stat-row">
+          <div class="stat">
+            <span class="num">예시</span>
+            <span class="label">탐지 기록</span>
+          </div>
+          <div class="stat">
+            <span class="num">2대</span>
+            <span class="label">연결 예정</span>
+          </div>
+        </div>
+        <a class="card-link" href="control.html">관제 화면 전체 보기</a>
+      </section>
+
+      <!-- 프로젝트 소개 요약 -->
+      <section id="about-preview" class="preview-card">
+        <h2>프로젝트 소개</h2>
+        <p>4인 팀 4ositive의 미니프로젝트입니다. 차량 이상상황과 낙하물 세 종류를 관제 화면에서 구분하고, 모델 실험과 평가 과정을 정리합니다.</p>
+        <a class="card-link" href="about.html">프로젝트 소개 자세히 보기</a>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- 챗봇 버튼 -->
+  <button id="chat-fab" type="button" aria-expanded="false" aria-controls="chat-panel"><span class="sr-only">도움말 챗봇 열기</span></button>
+  <div id="chat-panel" role="dialog" aria-label="도움말 챗봇"></div>
+
+  <footer>
+    <p>© 2026 4ositive · AI-X 스마트 교통 및 인프라 유지관리 아카데미 미니프로젝트</p>
+  </footer>
+
+  <script src="../js/site.js"></script>
+</body>
+</html>
