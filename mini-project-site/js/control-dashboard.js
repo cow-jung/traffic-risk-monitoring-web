@@ -248,9 +248,11 @@
     catch (error) { $('source-error').textContent = error instanceof TypeError ? '올바른 주소를 입력해 주세요.' : error.message; }
   });
   $('media-url').addEventListener('keydown', function (event) { if (event.key === 'Enter') $('open-link').click(); });
+  $('choose-media-file').addEventListener('click', function () { $('media-file').click(); });
   $('media-file').addEventListener('change', function (event) {
     var file = event.target.files[0];
     if (!file) return;
+    $('selected-file-name').textContent = file.name;
     if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
       $('source-error').textContent = '사진 또는 영상 파일만 선택해 주세요.';
       return;

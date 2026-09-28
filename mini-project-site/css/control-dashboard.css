@@ -15,6 +15,7 @@
 #dashboard .summary-card > span { font-size: 0.83rem; color: var(--fog-500); }
 #dashboard .summary-card strong { display: block; margin-top: 10px; font-size: 1.55rem; line-height: 1.1; letter-spacing: -0.02em; color: var(--fog-100); overflow-wrap: anywhere; }
 #dashboard .summary-card:nth-child(2) strong { color: var(--amber); }
+html[data-theme="light"] #dashboard .summary-card:nth-child(2) strong { color: #815000; }
 #dashboard .summary-card small { font-weight: 400; color: var(--fog-500); font-size: 0.74rem; }
 #dashboard .dash-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
 #dashboard section.dash-card { padding: 0; border: 1px solid var(--line-700); background: var(--asphalt-900); border-radius: var(--radius-m); overflow: hidden; }
@@ -35,6 +36,11 @@
 #dashboard .source-controls { padding: 16px; }
 #dashboard .source-controls label { display: block; color: var(--fog-300); font-size: 0.86rem; font-weight: 600; margin: 0 0 8px; }
 #dashboard .source-controls label:not(:first-child) { margin-top: 16px; }
+#dashboard .source-controls .source-upload-label { display: block; color: var(--fog-300); font-size: 0.86rem; font-weight: 600; margin: 16px 0 8px; }
+#dashboard .file-picker { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; min-width: 0; }
+#dashboard .file-picker-button { padding: 8px 14px; border: 1px solid var(--amber); border-radius: var(--radius-m); background: var(--amber); color: #17212b; font: inherit; font-weight: 700; }
+#dashboard .file-picker-button:hover { background: #ffbf47; }
+#dashboard .file-picker #selected-file-name { color: var(--fog-300); font-size: 0.86rem; overflow-wrap: anywhere; min-width: 0; }
 #dashboard .source-row { display: flex; gap: 8px; }
 #dashboard .source-row input { flex: 1; min-width: 0; }
 #dashboard .source-row .btn { padding: 8px 14px; white-space: nowrap; }

@@ -54,11 +54,11 @@ html[data-theme="light"] {
   --fog-300: #304658;
   --fog-500: #536879;
   --fog-700: #607588;
-  --amber: #a45e00;
+  --amber: #ffb020;
   --amber-dim: #ba873b;
-  --amber-glow: rgba(164, 94, 0, 0.12);
+  --amber-glow: rgba(255, 176, 32, 0.16);
   --danger: #bf3049;
-  --caution: #a45e00;
+  --caution: #ffb020;
   --safe: #087b54;
 }
 html[data-theme="light"] header { background: rgba(244, 247, 250, 0.92); }
@@ -66,8 +66,12 @@ html[data-theme="light"] #video-wrapper { background: linear-gradient(160deg, va
 html[data-theme="light"] .feed-status { background: rgba(255, 255, 255, 0.88); color: var(--fog-300); }
 html[data-theme="light"] .btn-primary,
 html[data-theme="light"] nav a.active,
-html[data-theme="light"] .chat-msg.user { color: #fff; }
-html[data-theme="light"] .btn-primary:hover { background: #874e00; border-color: #874e00; }
+html[data-theme="light"] .chat-msg.user { color: #172633; }
+html[data-theme="light"] .eyebrow,
+html[data-theme="light"] .compare-takeaway strong,
+html[data-theme="light"] .demo-label,
+html[data-theme="light"] #model-compare .tab-btn.active,
+html[data-theme="light"] #theme-toggle { color: #815000; }
 
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -564,7 +568,7 @@ td.mono, .mono-cell { font-family: var(--font-mono); font-size: 0.85rem; color: 
 #model-compare .tabs {
   display: flex;
   gap: 6px;
-  overflow-x: auto;
+  flex-wrap: wrap;
   margin-bottom: 18px;
   border-bottom: 1px solid var(--line-700);
 }
@@ -595,6 +599,12 @@ td.mono, .mono-cell { font-family: var(--font-mono); font-size: 0.85rem; color: 
 #model-compare .compare-takeaway { color: var(--fog-300); line-height: 1.65; margin-top: 15px; }
 #model-compare .compare-takeaway strong { color: var(--amber); margin-right: 7px; }
 #model-compare .compare-table-wrap + .model-note { margin-top: 12px; }
+#model-compare .compare-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 20px 0 14px; }
+#model-compare .compare-chart-card { min-width: 0; padding: 18px; background: var(--asphalt-900); border: 1px solid var(--line-700); border-radius: var(--radius-m); }
+#model-compare .compare-chart-card h3 { font-size: 1rem; margin-bottom: 4px; }
+#model-compare .compare-chart-card p { color: var(--fog-500); font-size: 0.82rem; }
+#model-compare .compare-chart-canvas { position: relative; height: 280px; margin-top: 16px; }
+@media (max-width: 800px) { #model-compare .compare-charts { grid-template-columns: 1fr; } }
 .metric-row { display: grid; gap: 12px; margin-bottom: 14px; }
 .metric {
   display: grid;
