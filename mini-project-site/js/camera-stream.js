@@ -18,6 +18,26 @@
     if (monitor) monitor.textContent = connected.size === 2 ? 'AI 서버 카메라 LIVE' : connected.size ? '카메라 일부 연결' : '카메라 연결 대기';
   }
 
+  function markLive(cameraId) {
+    var card = cards[cameraId];
+    if (!card) return;
+    connected.add(cameraId);
+    card.status.textContent = 'LIVE';
+    card.status.classList.add('is-live');
+    card.image.hidden = false;
+    card.waiting.hidden = true;
+    updateSummary();
+  }
+
+  function startStream(cameraId, force) {
+    var card = cards[cameraId];
+    if (!card) return;
+    if (force || !card.image.getAttribute('src')) {
+      card.image.src = card.image.dataset.streamSrc + '&_=' + Date.now();
+    }
+    card.image.hidden = false;
+  }
+
   function makeCameraCard(camera) {
     var article = document.createElement('article');
     article.className = 'camera-card live-camera-card';
@@ -28,7 +48,7 @@
     strong.textContent = camera.label;
     var status = document.createElement('span');
     status.className = 'camera-live-status';
-    status.textContent = '연결 대기';
+    status.textContent = '영상 연결 중';
     title.append(strong, status);
 
     var stage = document.createElement('div');
@@ -37,17 +57,24 @@
     image.className = 'camera-stream';
     image.alt = camera.label + ' 실시간 AI 분석 영상';
     image.dataset.streamSrc = serverBase + '/video_feed?cam_id=' + camera.id;
-    image.hidden = true;
 
     var waiting = document.createElement('div');
     waiting.className = 'camera-stream-error';
-    waiting.innerHTML = '<strong>카메라 연결 대기</strong><p>원격 AI 서버와 카메라 연결 상태를 확인해 주세요.</p>';
+    waiting.innerHTML = '<strong>카메라 영상 연결 중</strong><p>AI 서버의 실시간 영상 스트림을 연결하고 있습니다.</p>';
+    waiting.hidden = true;
+
+    image.addEventListener('load', function () {
+      markLive(camera.id);
+    });
 
     image.addEventListener('error', function () {
+      connected.delete(camera.id);
       image.hidden = true;
       waiting.hidden = false;
-      status.textContent = '영상 오류';
+      status.textContent = '영상 재연결 중';
       status.classList.remove('is-live');
+      updateSummary();
+      window.setTimeout(function () { startStream(camera.id, true); }, 3000);
     });
 
     stage.append(image, waiting);
@@ -63,39 +90,23 @@
       var data = await response.json();
 
       cameras.forEach(function (camera) {
-        var online = Boolean(data[camera.id] && data[camera.id].connected);
         var card = cards[camera.id];
         if (!card) return;
 
-        if (online) {
-          connected.add(camera.id);
-          card.status.textContent = 'LIVE';
-          card.status.classList.add('is-live');
-          if (!card.image.src) card.image.src = card.image.dataset.streamSrc + '&_=' + Date.now();
-          card.image.hidden = false;
-          card.waiting.hidden = true;
-        } else {
-          connected.delete(camera.id);
-          card.status.textContent = '연결 대기';
-          card.status.classList.remove('is-live');
-          card.image.hidden = true;
-          if (card.image.src) card.image.removeAttribute('src');
-          card.waiting.hidden = false;
+        // debug_status의 connected 값은 보조 상태로만 사용합니다.
+        // 실제 영상 표시 여부는 MJPEG <img> 스트림의 load/error가 결정합니다.
+        if (!card.image.getAttribute('src')) startStream(camera.id, false);
+
+        if (data[camera.id] && data[camera.id].connected && !connected.has(camera.id)) {
+          card.status.textContent = '영상 연결 중';
         }
       });
-      updateSummary();
     } catch (error) {
-      connected.clear();
+      // 상태 API가 잠시 실패해도 정상 동작 중인 영상 스트림을 끊지 않습니다.
       cameras.forEach(function (camera) {
         var card = cards[camera.id];
-        if (!card) return;
-        card.status.textContent = '서버 확인 필요';
-        card.status.classList.remove('is-live');
-        card.image.hidden = true;
-        if (card.image.src) card.image.removeAttribute('src');
-        card.waiting.hidden = false;
+        if (card && !card.image.getAttribute('src')) startStream(camera.id, false);
       });
-      updateSummary();
     }
   }
 
@@ -103,10 +114,13 @@
     var grid = document.getElementById('traffic-view');
     if (!grid) return;
     grid.replaceChildren();
-    cameras.forEach(function (camera) { grid.append(makeCameraCard(camera)); });
+    cameras.forEach(function (camera) {
+      grid.append(makeCameraCard(camera));
+      startStream(camera.id, false);
+    });
     updateSummary();
     pollStatus();
-    window.setInterval(pollStatus, 2000);
+    window.setInterval(pollStatus, 3000);
   }
 
   window.addEventListener('DOMContentLoaded', connectCameras);
