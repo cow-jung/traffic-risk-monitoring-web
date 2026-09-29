@@ -13,15 +13,20 @@
 <header><div class="brand">위기탈출 넘버 포</div><nav aria-label="주 메뉴"><a href="/">홈</a><a href="/about">개요</a><a href="/control">대시보드</a></nav></header>
 <main id="history-page">
   <div class="history-heading">
-    <div><p class="eyebrow">DETECTION HISTORY</p><h1>전체 탐지 기록</h1><p>저장된 AI 이상상황 기록을 날짜·카메라·유형·검색어로 조회할 수 있습니다.</p></div>
+    <div><p class="eyebrow">DETECTION HISTORY</p><h1>전체 탐지 기록</h1><p>전체·주정차 탐지·낙하물 탐지를 구분하고 날짜·카메라·세부 유형·검색어로 조회할 수 있습니다.</p></div>
     <div class="history-actions"><a class="btn" href="/control">← 대시보드</a><button class="btn btn-primary" id="download-csv" type="button">CSV 다운로드</button></div>
   </div>
   <section class="history-search-card">
+    <div class="history-category-tabs" role="tablist" aria-label="탐지 기록 구분">
+      <button class="history-category active" type="button" data-category="all" aria-selected="true">전체</button>
+      <button class="history-category" type="button" data-category="traffic" aria-selected="false">주정차 탐지</button>
+      <button class="history-category" type="button" data-category="objects" aria-selected="false">낙하물 탐지</button>
+    </div>
     <div class="history-filters">
       <label>시작일<input id="date-from" type="date"></label>
       <label>종료일<input id="date-to" type="date"></label>
       <label>카메라<select id="history-camera"><option value="all">전체</option><option value="cam1">CAM 01</option><option value="cam2">CAM 02</option></select></label>
-      <label>유형<select id="history-type"><option value="all">전체</option><option value="주정차">주정차</option><option value="역주행">역주행</option><option value="사고">사고 및 위험</option><option value="위험 상황">위험 상황</option></select></label>
+      <label>세부 유형<select id="history-type"><option value="all">전체 유형</option></select></label>
       <label class="keyword-label">검색<input id="history-keyword" type="search" placeholder="메시지, 유형, 카메라 검색"></label>
     </div>
     <div class="filter-actions"><button class="btn btn-primary" id="search-history" type="button">검색</button><button class="btn" id="reset-history" type="button">초기화</button><span id="history-count">불러오는 중…</span></div>
