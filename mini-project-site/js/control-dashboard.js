@@ -40,6 +40,8 @@
       confidence: null,
       time: alert.time || currentTime(),
       reason: alert.message || '상세 메시지 수정',
+      imageUrl: alert.image_url || null,
+      videoUrl: alert.video_url || null,
       isReal: true
     };
   }
@@ -51,6 +53,8 @@
     source.onmessage = function (message) {
       try {
         var alert = JSON.parse(message.data);
+        var allowed = ['주정차 위반', '역주행 발생', '사고 및 위험', '위험 상황'];
+        if (allowed.indexOf(String(alert.type || '')) === -1) return;
         records.traffic.unshift(mapTrafficAlert(alert));
         if (records.traffic.length > 100) records.traffic.length = 100;
         if (view === 'traffic') render();
@@ -147,7 +151,7 @@
         var row = document.createElement('tr');
         row.className = 'clickable';
         row.addEventListener('click', function () { openDetails(event); });
-        [event.time, labels[event.type] + ' · 예시', Math.round(event.confidence * 100) + '%'].forEach(function (text, index) {
+        [event.time, labels[event.type] + (event.isReal ? '' : ' · 예시'), confidenceText(event)].forEach(function (text, index) {
           var cell = document.createElement('td');
           if (index === 0) {
             var openButton = document.createElement('button');
@@ -170,7 +174,7 @@
         var item = document.createElement('li');
         var label = document.createElement('span');
         var time = document.createElement('span');
-        label.textContent = labels[event.type] + ' · 예시' + (event.camera ? ' · ' + event.camera : '');
+        label.textContent = labels[event.type] + (event.isReal ? '' : ' · 예시') + (event.camera ? ' · ' + event.camera : '');
         time.className = 'alert-time';
         time.textContent = event.time;
         item.append(label, time);
@@ -257,16 +261,46 @@
   function openDetails(event) {
     $('event-title').textContent = labels[event.type] + ' 탐지 상세' + (event.isReal ? '' : ' · 예시');
     $('event-media').replaceChildren();
-    if (event.media) {
+
+    if (event.isReal && (event.imageUrl || event.videoUrl)) {
+      if (event.imageUrl) {
+        var imageWrap = document.createElement('div');
+        var imageTitle = document.createElement('strong');
+        imageTitle.textContent = '이벤트 이미지';
+        var image = document.createElement('img');
+        image.src = event.imageUrl;
+        image.alt = event.camera + ' ' + labels[event.type] + ' 발생 당시 이미지';
+        image.loading = 'eager';
+        imageWrap.append(imageTitle, image);
+        $('event-media').append(imageWrap);
+      }
+
+      if (event.videoUrl) {
+        var videoWrap = document.createElement('div');
+        var videoTitle = document.createElement('strong');
+        videoTitle.textContent = '이벤트 영상';
+        var video = document.createElement('video');
+        video.src = event.videoUrl;
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        var videoNote = document.createElement('p');
+        videoNote.className = 'source-hint';
+        videoNote.textContent = '이벤트 발생 직후에는 약 10초간 녹화 중이므로, 녹화가 끝난 뒤 재생이 안정적입니다.';
+        videoWrap.append(videoTitle, video, videoNote);
+        $('event-media').append(videoWrap);
+      }
+    } else if (event.media) {
       $('event-media').append(mediaElement(event.media, true));
     } else {
       var fallback = document.createElement('p');
-      fallback.textContent = event.isReal ? '이벤트 이미지/영상 경로는 현재 서버 데이터에 없어 수정이 필요합니다.' : '이 예시 기록에 연결된 영상·사진이 없습니다.';
+      fallback.textContent = event.isReal ? '이 기록에는 연결된 이벤트 이미지/영상이 없습니다.' : '이 예시 기록에 연결된 영상·사진이 없습니다.';
       $('event-media').append(fallback);
     }
+
     $('event-details').replaceChildren();
     [['유형', labels[event.type]], ['발생 시각', event.time], ['신뢰도', confidenceText(event)],
-      ['출처', event.media ? event.media.name : (event.camera || (event.isReal ? '수정' : '예시 데이터'))]].forEach(function (pair) {
+      ['출처', event.camera || (event.isReal ? '수정' : '예시 데이터')]].forEach(function (pair) {
       var wrapper = document.createElement('div');
       var term = document.createElement('dt');
       var value = document.createElement('dd');
@@ -276,6 +310,12 @@
       $('event-details').append(wrapper);
     });
     $('event-reason').textContent = '탐지 이유: ' + event.reason;
+    var dialogNote = $('event-dialog').querySelector('.dialog-note');
+    if (dialogNote) {
+      dialogNote.textContent = event.isReal
+        ? '실제 AI 서버에서 수신한 이상상황 기록입니다. 신뢰도는 이벤트 데이터 연결 전이라 수정으로 표시됩니다.'
+        : '예시 기록입니다. 실제 모델 판정 결과가 아닙니다.';
+    }
     $('event-dialog').showModal();
   }
 
