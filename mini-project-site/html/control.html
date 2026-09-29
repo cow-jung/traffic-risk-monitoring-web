@@ -66,7 +66,7 @@
           <section class="dash-card" aria-labelledby="history-title">
             <div class="dash-card-head"><h2 id="history-title">탐지 기록</h2><select id="camera-filter" aria-label="카메라 필터"><option value="all">전체 카메라</option><option value="CAM 01">CAM 01</option><option value="CAM 02">CAM 02</option></select></div>
             <div class="history-filter"><label for="type-filter">유형</label><select id="type-filter" aria-label="탐지 유형"><option value="all">전체 유형</option><option value="parking">주정차</option><option value="wrongway">역주행</option></select></div>
-            <div id="event-list" class="event-list"></div>
+            <div id="event-list" class="event-list"></div><div class="history-more"><a class="btn btn-primary" href="/history">더보기 · 전체 탐지 기록</a></div>
           </section>
           <section class="dash-card"><div class="dash-card-head"><h2 id="criteria-title">주정차·역주행 판정</h2></div><div id="criteria-copy" class="criteria-copy">주정차는 지정 구역의 정차 지속 시간, 역주행은 차량 이동 방향을 기준으로 판정할 예정입니다. 실제 판정 기준은 모델 연결 단계에서 확정합니다.</div></section>
         </aside>
@@ -75,11 +75,11 @@
     <p class="dash-disclaimer">주정차·역주행 탭은 <strong>실제 AI 서버 이상상황 이벤트</strong>를 표시합니다. 상세보기에서 저장된 이벤트 이미지와 영상을 확인할 수 있습니다. 과거 탐지 기록도 AI 서버에서 불러오며, 신뢰도 값이 없는 기록은 <strong>—</strong>로 표시됩니다. 낙하물 탭은 아직 기능 확인용 예시입니다.</p>
     <div class="legacy-panels">
 <section id="detection-info">
-      <h2>최근 탐지 결과</h2>
+      <h2>오늘의 최근 탐지 결과 <small>최근 10건</small></h2>
       <table>
         <thead>
           <tr>
-            <th>시간</th>
+            <th>발생 일시</th>
             <th>유형</th>
             <th>신뢰도</th>
           </tr>
@@ -129,7 +129,7 @@
     </section>
 
 <section id="detection-log">
-      <h2>탐지 로그</h2>
+      <h2>탐지 로그 <small>최근 30건</small></h2>
       <ul id="log-list"></ul>
     </section>
     </div>
