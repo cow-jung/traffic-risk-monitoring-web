@@ -302,7 +302,7 @@
       var details = document.createElement('p');
       details.textContent = (event.camera ? event.camera + ' · ' : '') + '신뢰도 ' + confidenceText(event);
       var time = document.createElement('time');
-      time.textContent = event.time;
+      time.textContent = eventDateTime(event);
       var hint = document.createElement('p');
       hint.className = 'event-hint';
       hint.textContent = '상세 보기';
