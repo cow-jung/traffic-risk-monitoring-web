@@ -6,13 +6,10 @@
   var $ = function (id) { return document.getElementById(id); };
   if (!$('dash-panel')) return;
 
-  var labels = { parking: '주정차', wrongway: '역주행', wood: '목재', box: '상자', pet: '페트병' };
-  var icons = { parking: 'P', wrongway: '↩', wood: '▤', box: '□', pet: '◉' };
+  var labels = { parking: '주정차', wrongway: '역주행', accident: '사고 및 위험', danger: '위험 상황', disconnected: '연결 단절', connected: '연결 완료', recording: '녹화 상태', other: '기타', wood: '목재', box: '상자', pet: '페트병' };
+  var icons = { parking: 'P', wrongway: '↩', accident: '!', danger: '!', disconnected: '×', connected: '●', recording: '●', other: '!', wood: '▤', box: '□', pet: '◉' };
   var initial = {
-    traffic: [
-      { type: 'parking', camera: 'CAM 01', confidence: .94, time: '10:41:12', reason: '예시: 지정 구역에서 차량이 설정 시간 이상 정차한 것으로 가정했습니다.' },
-      { type: 'wrongway', camera: 'CAM 02', confidence: .89, time: '10:32:07', reason: '예시: 차량의 이동 방향이 지정된 진행 방향과 반대인 것으로 가정했습니다.' }
-    ],
+    traffic: [],
     objects: [
       { type: 'box', confidence: .91, time: '10:42:18', reason: '예시: 도로 영역에서 상자 형태의 객체를 탐지한 것으로 가정했습니다.' },
       { type: 'wood', confidence: .86, time: '10:37:05', reason: '예시: 도로 영역에서 목재 형태의 객체를 탐지한 것으로 가정했습니다.' },
@@ -20,10 +17,55 @@
     ]
   };
   var records = structuredClone(initial);
+  var trafficStreamStarted = false;
   var view = 'traffic';
   var next = { traffic: 0, objects: 0 };
   var media = null;
   var localUrls = new Set();
+
+  function mapTrafficAlert(alert) {
+    var rawType = String(alert.type || '');
+    var type = rawType.indexOf('주정차') >= 0 ? 'parking'
+      : rawType.indexOf('역주행') >= 0 ? 'wrongway'
+      : rawType.indexOf('사고') >= 0 ? 'accident'
+      : rawType.indexOf('위험') >= 0 ? 'danger'
+      : rawType.indexOf('단절') >= 0 ? 'disconnected'
+      : rawType.indexOf('연결 완료') >= 0 ? 'connected'
+      : rawType.indexOf('녹화') >= 0 ? 'recording' : 'other';
+    var cam = String(alert.cam_id || '').toLowerCase();
+    return {
+      type: type,
+      rawType: rawType || '이벤트',
+      camera: cam === 'cam1' ? 'CAM 01' : cam === 'cam2' ? 'CAM 02' : (alert.cam_id || '수정'),
+      confidence: null,
+      time: alert.time || currentTime(),
+      reason: alert.message || '상세 메시지 수정',
+      isReal: true
+    };
+  }
+
+  function startTrafficStream() {
+    if (trafficStreamStarted || !window.EventSource) return;
+    trafficStreamStarted = true;
+    var source = new EventSource('/stream_alerts');
+    source.onmessage = function (message) {
+      try {
+        var alert = JSON.parse(message.data);
+        records.traffic.unshift(mapTrafficAlert(alert));
+        if (records.traffic.length > 100) records.traffic.length = 100;
+        if (view === 'traffic') render();
+      } catch (error) {
+        console.error('탐지 이벤트 처리 실패', error);
+      }
+    };
+    source.onerror = function () {
+      console.warn('원격 AI 탐지 이벤트 스트림 재연결 대기 중');
+    };
+  }
+
+  function confidenceText(event) {
+    return typeof event.confidence === 'number' ? Math.round(event.confidence * 100) + '%' : '수정';
+  }
 
   function currentTime() {
     var now = new Date();
@@ -143,7 +185,7 @@
         var text = document.createElement('span');
         time.className = 't';
         time.textContent = event.time;
-        text.textContent = labels[event.type] + ' · 신뢰도 ' + Math.round(event.confidence * 100) + '% · 예시';
+        text.textContent = labels[event.type] + ' · 신뢰도 ' + confidenceText(event) + (event.isReal ? '' : ' · 예시');
         item.append(time, text);
         log.append(item);
       });
@@ -161,7 +203,7 @@
     if (!shown.length) {
       var empty = document.createElement('p');
       empty.className = 'event-empty';
-      empty.textContent = '표시할 예시 탐지 기록이 없습니다.';
+      empty.textContent = view === 'traffic' ? '아직 수신된 실제 탐지 기록이 없습니다.' : '표시할 예시 탐지 기록이 없습니다.';
       $('event-list').append(empty);
     }
     shown.forEach(function (event) {
@@ -174,9 +216,9 @@
       icon.textContent = icons[event.type];
       var content = document.createElement('span');
       var title = document.createElement('strong');
-      title.textContent = labels[event.type] + ' 탐지 · 예시';
+      title.textContent = labels[event.type] + (event.isReal ? ' 탐지' : ' 탐지 · 예시');
       var details = document.createElement('p');
-      details.textContent = (event.camera ? event.camera + ' · ' : '') + '신뢰도 ' + Math.round(event.confidence * 100) + '%';
+      details.textContent = (event.camera ? event.camera + ' · ' : '') + '신뢰도 ' + confidenceText(event);
       var time = document.createElement('time');
       time.textContent = event.time;
       var hint = document.createElement('p');
@@ -188,8 +230,8 @@
       $('event-list').append(item);
     });
 
-    $('detection-count').textContent = events.length + '건 · 예시';
-    $('latest-event').textContent = events.length ? labels[events[0].type] + ' · 예시' : '없음';
+    $('detection-count').textContent = events.length + '건' + (view === 'traffic' ? '' : ' · 예시');
+    $('latest-event').textContent = events.length ? labels[events[0].type] + (view === 'traffic' ? '' : ' · 예시') : '없음';
     $('source-label').textContent = view === 'traffic' ? '연결된 카메라' : '선택한 매체';
     $('source-count').innerHTML = view === 'traffic' ? '0 <small>/ 2대</small>' : (media ? '1 <small>개</small>' : '0 <small>개</small>');
     $('system-state').textContent = view === 'traffic' ? '연결 대기' : (media ? '매체 확인 중' : '매체 대기');
@@ -213,18 +255,18 @@
   }
 
   function openDetails(event) {
-    $('event-title').textContent = labels[event.type] + ' 탐지 상세 · 예시';
+    $('event-title').textContent = labels[event.type] + ' 탐지 상세' + (event.isReal ? '' : ' · 예시');
     $('event-media').replaceChildren();
     if (event.media) {
       $('event-media').append(mediaElement(event.media, true));
     } else {
       var fallback = document.createElement('p');
-      fallback.textContent = '이 예시 기록에 연결된 영상·사진이 없습니다.';
+      fallback.textContent = event.isReal ? '이벤트 이미지/영상 경로는 현재 서버 데이터에 없어 수정이 필요합니다.' : '이 예시 기록에 연결된 영상·사진이 없습니다.';
       $('event-media').append(fallback);
     }
     $('event-details').replaceChildren();
-    [['유형', labels[event.type]], ['발생 시각', event.time], ['신뢰도', Math.round(event.confidence * 100) + '%'],
-      ['출처', event.media ? event.media.name : (event.camera || '예시 데이터')]].forEach(function (pair) {
+    [['유형', labels[event.type]], ['발생 시각', event.time], ['신뢰도', confidenceText(event)],
+      ['출처', event.media ? event.media.name : (event.camera || (event.isReal ? '수정' : '예시 데이터'))]].forEach(function (pair) {
       var wrapper = document.createElement('div');
       var term = document.createElement('dt');
       var value = document.createElement('dd');
@@ -325,5 +367,6 @@
     note.textContent = '현재는 예시 대시보드입니다. 신고 전송은 서버 연결 후 사용할 수 있습니다.';
   });
   window.addEventListener('pagehide', function () { localUrls.forEach(function (url) { URL.revokeObjectURL(url); }); });
+  startTrafficStream();
   render();
 })();
