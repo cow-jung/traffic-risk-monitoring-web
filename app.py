@@ -32,6 +32,11 @@ def control():
     return render_template("control.html")
 
 
+@app.route("/history")
+def history():
+    return render_template("history.html")
+
+
 @app.route("/health")
 def health():
     return jsonify({
