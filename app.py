@@ -111,6 +111,51 @@ def camera_status():
     return jsonify(result)
 
 
+@app.route("/event_media/<cam_id>/<media_type>/<path:filename>")
+def event_media(cam_id, media_type, filename):
+    """Proxy saved event images/videos from the remote Traffic AI server."""
+    if not _valid_camera(cam_id) or media_type not in ("images", "videos"):
+        return "invalid event media path", 400
+
+    upstream_url = f"{AI_SERVER_BASE}/event_media/{cam_id}/{media_type}/{filename}"
+    headers = {}
+    if request.headers.get("Range"):
+        headers["Range"] = request.headers["Range"]
+
+    try:
+        upstream = requests.get(
+            upstream_url,
+            headers=headers,
+            stream=True,
+            timeout=(HTTP_TIMEOUT, None),
+        )
+    except requests.RequestException as exc:
+        return f"AI event media unavailable: {exc}", 502
+
+    response_headers = {
+        "Cache-Control": "no-store",
+        "Accept-Ranges": upstream.headers.get("Accept-Ranges", "bytes"),
+    }
+    for name in ("Content-Length", "Content-Range"):
+        if upstream.headers.get(name):
+            response_headers[name] = upstream.headers[name]
+
+    def generate():
+        try:
+            for chunk in upstream.iter_content(chunk_size=64 * 1024):
+                if chunk:
+                    yield chunk
+        finally:
+            upstream.close()
+
+    return Response(
+        generate(),
+        status=upstream.status_code,
+        content_type=upstream.headers.get("Content-Type", "application/octet-stream"),
+        headers=response_headers,
+    )
+
+
 @app.route("/stream_alerts")
 def stream_alerts():
     """Proxy real-time SSE alerts from the remote Traffic AI server."""
