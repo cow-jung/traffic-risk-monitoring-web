@@ -122,6 +122,27 @@
     };
   }
 
+  function eventDateTime(event) {
+    if (event.timestamp) {
+      var parsed = new Date(String(event.timestamp).replace(' ', 'T'));
+      if (!Number.isNaN(parsed.getTime())) return parsed.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    }
+    return event.time || '—';
+  }
+
+  function eventDate(event) {
+    if (event.timestamp) return String(event.timestamp).slice(0, 10);
+    return '';
+  }
+
+  function isToday(event) {
+    var now = new Date();
+    var y = now.getFullYear();
+    var m = String(now.getMonth() + 1).padStart(2, '0');
+    var d = String(now.getDate()).padStart(2, '0');
+    return eventDate(event) === [y, m, d].join('-');
+  }
+
   function confidenceText(event) {
     return typeof event.confidence === 'number' ? Math.round(event.confidence * 100) + '%' : '—';
   }
@@ -197,16 +218,17 @@
   function renderLegacy() {
     // 기존 하단 목록을 새 탐지 기록과 같은 데이터로 표시합니다.
     var events = records[view];
+    var recentEvents = view === 'traffic' ? events.filter(isToday).slice(0, 10) : events.slice(0, 10);
     var table = $('detection-table-body');
     var alerts = $('alert-list');
     var log = $('log-list');
     if (table) {
       table.replaceChildren();
-      events.slice(0, 5).forEach(function (event) {
+      recentEvents.forEach(function (event) {
         var row = document.createElement('tr');
         row.className = 'clickable';
         row.addEventListener('click', function () { openDetails(event); });
-        [event.time, labels[event.type] + (event.isReal ? '' : ' · 예시'), confidenceText(event)].forEach(function (text, index) {
+        [eventDateTime(event), labels[event.type] + (event.isReal ? '' : ' · 예시'), confidenceText(event)].forEach(function (text, index) {
           var cell = document.createElement('td');
           if (index === 0) {
             var openButton = document.createElement('button');
@@ -231,19 +253,19 @@
         var time = document.createElement('span');
         label.textContent = labels[event.type] + (event.isReal ? '' : ' · 예시') + (event.camera ? ' · ' + event.camera : '');
         time.className = 'alert-time';
-        time.textContent = event.time;
+        time.textContent = eventDateTime(event);
         item.append(label, time);
         alerts.append(item);
       });
     }
     if (log) {
       log.replaceChildren();
-      events.forEach(function (event) {
+      events.slice(0, 30).forEach(function (event) {
         var item = document.createElement('li');
         var time = document.createElement('span');
         var text = document.createElement('span');
         time.className = 't';
-        time.textContent = event.time;
+        time.textContent = eventDateTime(event);
         text.textContent = labels[event.type] + ' · 신뢰도 ' + confidenceText(event) + (event.isReal ? '' : ' · 예시');
         item.append(time, text);
         log.append(item);
@@ -258,6 +280,7 @@
       return (view === 'objects' || $('camera-filter').value === 'all' || event.camera === $('camera-filter').value)
         && ($('type-filter').value === 'all' || event.type === $('type-filter').value);
     });
+    if (view === 'traffic') shown = shown.slice(0, 30);
     $('event-list').replaceChildren();
     if (!shown.length) {
       var empty = document.createElement('p');
@@ -358,7 +381,7 @@
     }
 
     $('event-details').replaceChildren();
-    [['유형', labels[event.type]], ['발생 시각', event.time], ['신뢰도', confidenceText(event)],
+    [['유형', labels[event.type]], ['발생 시각', eventDateTime(event)], ['신뢰도', confidenceText(event)],
       ['출처', event.camera || (event.isReal ? 'AI 서버' : '예시 데이터')]].forEach(function (pair) {
       var wrapper = document.createElement('div');
       var term = document.createElement('dt');
