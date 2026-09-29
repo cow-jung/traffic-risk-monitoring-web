@@ -6,8 +6,7 @@
     { id: 'cam2', label: 'CAM 02' }
   ];
   var connected = new Set();
-  var protocol = location.protocol === 'https:' ? 'https:' : 'http:';
-  var serverBase = protocol + '//' + location.hostname + ':5000';
+  var serverBase = location.origin;
 
   function updateSummary() {
     var count = document.getElementById('source-count');
