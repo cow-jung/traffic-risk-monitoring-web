@@ -39,17 +39,29 @@
     return {
       type: type,
       rawType: rawType || '이벤트',
-      camera: cam === 'cam1' ? 'CAM 01' : cam === 'cam2' ? 'CAM 02' : (alert.cam_id || '수정'),
-      confidence: null,
+      camera: cam === 'cam1' ? 'CAM 01' : cam === 'cam2' ? 'CAM 02' : (alert.cam_id || 'AI 서버'),
+      confidence: typeof alert.confidence === 'number' ? alert.confidence : null,
       time: alert.time || currentTime(),
-      reason: alert.message || '상세 메시지 수정',
-      imageUrl: alert.image_url || null,
-      videoUrl: alert.video_url || null,
+      reason: alert.message || 'AI 서버 탐지 이벤트',
+      imageUrl: normalizeEventMediaUrl(alert.image_url),
+      videoUrl: normalizeEventMediaUrl(alert.video_url),
       isReal: true,
       eventId: alert.event_id || null,
       timestamp: alert.timestamp || null,
       historical: Boolean(alert.historical)
     };
+  }
+
+  function normalizeEventMediaUrl(url) {
+    if (!url) return null;
+    var value = String(url);
+    if (value.indexOf('/event_media/') === 0) return value;
+    try {
+      var parsed = new URL(value, window.location.origin);
+      return parsed.pathname.indexOf('/event_media/') === 0 ? parsed.pathname + parsed.search : value;
+    } catch (error) {
+      return value;
+    }
   }
 
   function eventKey(event) {
@@ -111,7 +123,7 @@
   }
 
   function confidenceText(event) {
-    return typeof event.confidence === 'number' ? Math.round(event.confidence * 100) + '%' : '수정';
+    return typeof event.confidence === 'number' ? Math.round(event.confidence * 100) + '%' : '—';
   }
 
   function currentTime() {
@@ -347,7 +359,7 @@
 
     $('event-details').replaceChildren();
     [['유형', labels[event.type]], ['발생 시각', event.time], ['신뢰도', confidenceText(event)],
-      ['출처', event.camera || (event.isReal ? '수정' : '예시 데이터')]].forEach(function (pair) {
+      ['출처', event.camera || (event.isReal ? 'AI 서버' : '예시 데이터')]].forEach(function (pair) {
       var wrapper = document.createElement('div');
       var term = document.createElement('dt');
       var value = document.createElement('dd');
@@ -360,7 +372,7 @@
     var dialogNote = $('event-dialog').querySelector('.dialog-note');
     if (dialogNote) {
       dialogNote.textContent = event.isReal
-        ? '실제 AI 서버에서 수신한 이상상황 기록입니다. 신뢰도는 이벤트 데이터 연결 전이라 수정으로 표시됩니다.'
+        ? '실제 AI 서버에서 저장·수신한 이상상황 기록입니다. 신뢰도 값이 없는 기록은 —로 표시됩니다.'
         : '예시 기록입니다. 실제 모델 판정 결과가 아닙니다.';
     }
     $('event-dialog').showModal();
