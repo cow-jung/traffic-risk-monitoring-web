@@ -45,8 +45,49 @@
       reason: alert.message || '상세 메시지 수정',
       imageUrl: alert.image_url || null,
       videoUrl: alert.video_url || null,
-      isReal: true
+      isReal: true,
+      eventId: alert.event_id || null,
+      timestamp: alert.timestamp || null,
+      historical: Boolean(alert.historical)
     };
+  }
+
+  function eventKey(event) {
+    return event.eventId || [event.camera, event.rawType, event.timestamp || event.time, event.imageUrl || ''].join('|');
+  }
+
+  function mergeTrafficEvents(incoming) {
+    var merged = [];
+    var seen = new Set();
+    incoming.concat(records.traffic).forEach(function (event) {
+      var key = eventKey(event);
+      if (seen.has(key)) return;
+      seen.add(key);
+      merged.push(event);
+    });
+    merged.sort(function (a, b) {
+      var at = a.timestamp ? Date.parse(a.timestamp.replace(' ', 'T')) : 0;
+      var bt = b.timestamp ? Date.parse(b.timestamp.replace(' ', 'T')) : 0;
+      return bt - at;
+    });
+    records.traffic = merged.slice(0, 100);
+    try { localStorage.setItem('traffic-ai-events', JSON.stringify(records.traffic)); } catch (error) {}
+  }
+
+  function loadTrafficHistory() {
+    fetch('/event_history?limit=100', { cache: 'no-store' })
+      .then(function (response) {
+        if (!response.ok) throw new Error('이전 기록 조회 실패: ' + response.status);
+        return response.json();
+      })
+      .then(function (payload) {
+        var history = Array.isArray(payload.events) ? payload.events.map(mapTrafficAlert) : [];
+        mergeTrafficEvents(history);
+        if (view === 'traffic') render();
+      })
+      .catch(function (error) {
+        console.warn('이전 탐지 기록을 불러오지 못했습니다.', error);
+      });
   }
 
   function startTrafficStream() {
@@ -58,9 +99,7 @@
         var alert = JSON.parse(message.data);
         var allowed = ['주정차 위반', '역주행 발생', '사고 및 위험', '위험 상황'];
         if (allowed.indexOf(String(alert.type || '')) === -1) return;
-        records.traffic.unshift(mapTrafficAlert(alert));
-        if (records.traffic.length > 100) records.traffic.length = 100;
-        try { localStorage.setItem('traffic-ai-events', JSON.stringify(records.traffic)); } catch (error) { /* 저장 실패 시 실시간 표시는 유지 */ }
+        mergeTrafficEvents([mapTrafficAlert(alert)]);
         if (view === 'traffic') render();
       } catch (error) {
         console.error('탐지 이벤트 처리 실패', error);
@@ -420,6 +459,7 @@
     note.textContent = '현재는 예시 대시보드입니다. 신고 전송은 서버 연결 후 사용할 수 있습니다.';
   });
   window.addEventListener('pagehide', function () { localUrls.forEach(function (url) { URL.revokeObjectURL(url); }); });
+  loadTrafficHistory();
   startTrafficStream();
   render();
 })();
