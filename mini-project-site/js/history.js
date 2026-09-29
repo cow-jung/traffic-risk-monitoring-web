@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  var allEvents = [], filtered = [], page = 1, pageSize = 30;
+  var allEvents = [], filtered = [], page = 1, pageSize = 30, category = 'all';
   var $ = function (id) { return document.getElementById(id); };
 
   function text(v) { return v == null || v === '' ? '—' : String(v); }
@@ -28,13 +28,30 @@
       return bv-av;
     });
   }
+  function categoryOf(e) {
+    var type = String(e.type || '').toLowerCase();
+    var message = String(e.message || '').toLowerCase();
+    var hay = type + ' ' + message;
+    if (/(wood|box|pet|plywood|목재|상자|페트|낙하물)/.test(hay)) return 'objects';
+    if (/(주정차|역주행|사고|위험 상황)/.test(hay)) return 'traffic';
+    return 'other';
+  }
+  function fillTypeOptions() {
+    var options = category === 'traffic'
+      ? [['all','전체 유형'],['주정차','주정차'],['역주행','역주행'],['사고','사고 및 위험'],['위험 상황','위험 상황']]
+      : category === 'objects'
+        ? [['all','전체 유형'],['wood','목재'],['box','상자'],['pet','페트병']]
+        : [['all','전체 유형'],['주정차','주정차'],['역주행','역주행'],['사고','사고 및 위험'],['위험 상황','위험 상황'],['wood','목재'],['box','상자'],['pet','페트병']];
+    var select=$('history-type'); select.replaceChildren();
+    options.forEach(function(pair){ select.append(new Option(pair[1],pair[0])); });
+  }
   function applyFilters() {
     var from=$('date-from').value, to=$('date-to').value, cam=$('history-camera').value, type=$('history-type').value;
     var q=$('history-keyword').value.trim().toLowerCase();
     filtered=allEvents.filter(function(e){
       var d=eventDate(e), ecam=String(e.cam_id||'').toLowerCase(), etype=String(e.type||'');
       var hay=[e.message,e.type,e.cam_id,camLabel(e.cam_id),e.event_id].join(' ').toLowerCase();
-      return (!from||!d||d>=from)&&(!to||!d||d<=to)&&(cam==='all'||ecam===cam)&&(type==='all'||etype.indexOf(type)>=0)&&(!q||hay.indexOf(q)>=0);
+      return (category==='all'||categoryOf(e)===category)&&(!from||!d||d>=from)&&(!to||!d||d<=to)&&(cam==='all'||ecam===cam)&&(type==='all'||hay.indexOf(type.toLowerCase())>=0)&&(!q||hay.indexOf(q)>=0);
     });
     page=1; render();
   }
@@ -66,10 +83,20 @@
     var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=url;a.download='detection_history_'+new Date().toISOString().slice(0,10)+'.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
   }
+  document.querySelectorAll('.history-category').forEach(function(button){
+    button.addEventListener('click',function(){
+      category=button.dataset.category;
+      document.querySelectorAll('.history-category').forEach(function(item){
+        var active=item===button; item.classList.toggle('active',active); item.setAttribute('aria-selected',String(active));
+      });
+      fillTypeOptions(); applyFilters();
+    });
+  });
+  fillTypeOptions();
   fetch('/event_history?limit=1000',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(p){
     allEvents=sortEvents(Array.isArray(p.events)?p.events:[]);filtered=allEvents.slice();render();
   }).catch(function(){ $('history-body').innerHTML='<tr><td colspan="6">탐지 기록을 불러오지 못했습니다.</td></tr>';$('history-count').textContent='조회 실패';});
-  $('search-history').addEventListener('click',applyFilters);$('reset-history').addEventListener('click',function(){['date-from','date-to','history-keyword'].forEach(function(id){$(id).value='';});$('history-camera').value='all';$('history-type').value='all';filtered=allEvents.slice();page=1;render();});
+  $('search-history').addEventListener('click',applyFilters);$('reset-history').addEventListener('click',function(){['date-from','date-to','history-keyword'].forEach(function(id){$(id).value='';});$('history-camera').value='all';$('history-type').value='all';category='all';document.querySelectorAll('.history-category').forEach(function(item){var active=item.dataset.category==='all';item.classList.toggle('active',active);item.setAttribute('aria-selected',String(active));});fillTypeOptions();filtered=allEvents.slice();page=1;render();});
   $('history-keyword').addEventListener('keydown',function(e){if(e.key==='Enter')applyFilters();});
   $('prev-page').addEventListener('click',function(){if(page>1){page--;render();}});
   $('next-page').addEventListener('click',function(){if(page*pageSize<filtered.length){page++;render();}});
