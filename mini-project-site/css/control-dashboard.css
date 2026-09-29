@@ -94,3 +94,7 @@ html[data-theme="light"] #dashboard .summary-card:nth-child(2) strong { color: #
 [hidden] { display: none !important; }
 @media (max-width: 970px) { #dashboard .dash-grid { grid-template-columns: 1fr; } #dashboard .dash-side { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 680px) { #dashboard { padding: 18px 16px 60px; } #dashboard .dash-heading { align-items: start; flex-direction: column; } #dashboard .dash-summary { grid-template-columns: repeat(2, 1fr); } #dashboard .camera-grid, #dashboard .dash-side { grid-template-columns: 1fr; } #dashboard .source-row { flex-direction: column; } #dashboard .camera-empty { min-height: 220px; } .event-dialog .event-details { grid-template-columns: 1fr; } }
+
+#dashboard .history-more { padding: 12px 15px; border-top: 1px solid var(--line-700); text-align: center; }
+#dashboard .history-more .btn { display: inline-block; text-decoration: none; }
+#dashboard .legacy-panels h2 small { color: var(--fog-500); font-size: .72rem; font-weight: 400; margin-left: 8px; }
