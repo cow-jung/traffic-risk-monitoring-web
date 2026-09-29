@@ -15,7 +15,7 @@
     var monitor = document.getElementById('monitor-status');
     if (count) count.innerHTML = connected.size + ' <small>/ 2대</small>';
     if (state) state.textContent = connected.size === 2 ? '정상 연결' : connected.size ? '일부 연결' : '연결 대기';
-    if (monitor) monitor.textContent = connected.size === 2 ? '라즈베리 파이 카메라 LIVE' : connected.size ? '카메라 일부 연결' : '카메라 연결 대기';
+    if (monitor) monitor.textContent = connected.size === 2 ? 'AI 서버 카메라 LIVE' : connected.size ? '카메라 일부 연결' : '카메라 연결 대기';
   }
 
   function makeCameraCard(camera) {
@@ -35,12 +35,19 @@
     stage.className = 'camera-stream-stage';
     var image = document.createElement('img');
     image.className = 'camera-stream';
-    image.alt = camera.label + ' 라즈베리 파이 실시간 영상';
+    image.alt = camera.label + ' 실시간 AI 분석 영상';
     image.src = serverBase + '/video_feed?cam_id=' + camera.id;
 
     var waiting = document.createElement('div');
     waiting.className = 'camera-stream-error';
-    waiting.innerHTML = '<strong>카메라 프레임 대기 중</strong><p>라즈베리 파이에서 /upload_frame?cam_id=' + camera.id + ' 로 프레임을 보내면 자동으로 LIVE로 변경됩니다.</p>';
+    waiting.innerHTML = '<strong>카메라 연결 대기</strong><p>원격 AI 서버와 카메라 연결 상태를 확인해 주세요.</p>';
+
+    image.addEventListener('error', function () {
+      image.hidden = true;
+      waiting.hidden = false;
+      status.textContent = '영상 오류';
+      status.classList.remove('is-live');
+    });
 
     stage.append(image, waiting);
     article.append(title, stage);
