@@ -5,6 +5,7 @@
     { id: 'cam1', label: 'CAM 01' },
     { id: 'cam2', label: 'CAM 02' }
   ];
+  var cards = {};
   var connected = new Set();
   var serverBase = location.origin;
 
@@ -27,7 +28,7 @@
     strong.textContent = camera.label;
     var status = document.createElement('span');
     status.className = 'camera-live-status';
-    status.textContent = '연결 중';
+    status.textContent = '연결 대기';
     title.append(strong, status);
 
     var stage = document.createElement('div');
@@ -36,32 +37,55 @@
     image.className = 'camera-stream';
     image.alt = camera.label + ' 라즈베리 파이 실시간 영상';
     image.src = serverBase + '/video_feed?cam_id=' + camera.id;
-    var error = document.createElement('div');
-    error.className = 'camera-stream-error';
-    error.innerHTML = '<strong>영상 연결 실패</strong><p>Flask 영상 서버(:5000)와 라즈베리 파이 업로드 상태를 확인해 주세요.</p>';
-    error.hidden = true;
 
-    image.addEventListener('load', function () {
-      connected.add(camera.id);
-      status.textContent = 'LIVE';
-      status.classList.add('is-live');
-      error.hidden = true;
-      image.hidden = false;
-      updateSummary();
-    });
+    var waiting = document.createElement('div');
+    waiting.className = 'camera-stream-error';
+    waiting.innerHTML = '<strong>카메라 프레임 대기 중</strong><p>라즈베리 파이에서 /upload_frame?cam_id=' + camera.id + ' 로 프레임을 보내면 자동으로 LIVE로 변경됩니다.</p>';
 
-    image.addEventListener('error', function () {
-      connected.delete(camera.id);
-      status.textContent = '연결 실패';
-      status.classList.remove('is-live');
-      image.hidden = true;
-      error.hidden = false;
-      updateSummary();
-    });
-
-    stage.append(image, error);
+    stage.append(image, waiting);
     article.append(title, stage);
+    cards[camera.id] = { status: status, image: image, waiting: waiting };
     return article;
+  }
+
+  async function pollStatus() {
+    try {
+      var response = await fetch(serverBase + '/camera_status', { cache: 'no-store' });
+      if (!response.ok) throw new Error('camera_status ' + response.status);
+      var data = await response.json();
+
+      cameras.forEach(function (camera) {
+        var online = Boolean(data[camera.id] && data[camera.id].connected);
+        var card = cards[camera.id];
+        if (!card) return;
+
+        if (online) {
+          connected.add(camera.id);
+          card.status.textContent = 'LIVE';
+          card.status.classList.add('is-live');
+          card.image.hidden = false;
+          card.waiting.hidden = true;
+        } else {
+          connected.delete(camera.id);
+          card.status.textContent = '연결 대기';
+          card.status.classList.remove('is-live');
+          card.image.hidden = true;
+          card.waiting.hidden = false;
+        }
+      });
+      updateSummary();
+    } catch (error) {
+      connected.clear();
+      cameras.forEach(function (camera) {
+        var card = cards[camera.id];
+        if (!card) return;
+        card.status.textContent = '서버 확인 필요';
+        card.status.classList.remove('is-live');
+        card.image.hidden = true;
+        card.waiting.hidden = false;
+      });
+      updateSummary();
+    }
   }
 
   function connectCameras() {
@@ -70,6 +94,8 @@
     grid.replaceChildren();
     cameras.forEach(function (camera) { grid.append(makeCameraCard(camera)); });
     updateSummary();
+    pollStatus();
+    window.setInterval(pollStatus, 2000);
   }
 
   window.addEventListener('DOMContentLoaded', connectCameras);
