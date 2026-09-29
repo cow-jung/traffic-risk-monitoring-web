@@ -7,8 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent
 
 app = Flask(
     __name__,
-    template_folder=str(BASE_DIR / "mini-project-site" / "html"),
-    static_folder=str(BASE_DIR / "mini-project-site"),
+    template_folder=str(BASE_DIR / "site" / "html"),
+    static_folder=str(BASE_DIR / "site"),
     static_url_path="/static",
 )
 
