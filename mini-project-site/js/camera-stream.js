@@ -36,7 +36,8 @@
     var image = document.createElement('img');
     image.className = 'camera-stream';
     image.alt = camera.label + ' 실시간 AI 분석 영상';
-    image.src = serverBase + '/video_feed?cam_id=' + camera.id;
+    image.dataset.streamSrc = serverBase + '/video_feed?cam_id=' + camera.id;
+    image.hidden = true;
 
     var waiting = document.createElement('div');
     waiting.className = 'camera-stream-error';
@@ -70,6 +71,7 @@
           connected.add(camera.id);
           card.status.textContent = 'LIVE';
           card.status.classList.add('is-live');
+          if (!card.image.src) card.image.src = card.image.dataset.streamSrc + '&_=' + Date.now();
           card.image.hidden = false;
           card.waiting.hidden = true;
         } else {
@@ -77,6 +79,7 @@
           card.status.textContent = '연결 대기';
           card.status.classList.remove('is-live');
           card.image.hidden = true;
+          if (card.image.src) card.image.removeAttribute('src');
           card.waiting.hidden = false;
         }
       });
@@ -89,6 +92,7 @@
         card.status.textContent = '서버 확인 필요';
         card.status.classList.remove('is-live');
         card.image.hidden = true;
+        if (card.image.src) card.image.removeAttribute('src');
         card.waiting.hidden = false;
       });
       updateSummary();
