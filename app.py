@@ -111,6 +111,38 @@ def camera_status():
     return jsonify(result)
 
 
+@app.route("/stream_alerts")
+def stream_alerts():
+    """Proxy real-time SSE alerts from the remote Traffic AI server."""
+    try:
+        upstream = requests.get(
+            f"{AI_SERVER_BASE}/stream_alerts",
+            stream=True,
+            timeout=(HTTP_TIMEOUT, None),
+            headers={"Accept": "text/event-stream"},
+        )
+        upstream.raise_for_status()
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 502
+
+    def generate():
+        try:
+            for line in upstream.iter_lines(decode_unicode=True):
+                if line is not None:
+                    yield line + "\n"
+        finally:
+            upstream.close()
+
+    return Response(
+        generate(),
+        content_type="text/event-stream; charset=utf-8",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
 @app.route("/ai_status")
 def ai_status():
     """Expose the remote debug payload for dashboard diagnostics."""
