@@ -111,6 +111,25 @@ def camera_status():
     return jsonify(result)
 
 
+@app.route("/event_history")
+def event_history():
+    """Proxy stored historical detection records from the remote AI server."""
+    try:
+        upstream = requests.get(
+            f"{AI_SERVER_BASE}/event_history",
+            params={"limit": request.args.get("limit", "100")},
+            timeout=HTTP_TIMEOUT,
+        )
+        upstream.raise_for_status()
+        return Response(
+            upstream.content,
+            status=upstream.status_code,
+            content_type=upstream.headers.get("Content-Type", "application/json"),
+        )
+    except requests.RequestException as exc:
+        return jsonify({"events": [], "count": 0, "error": str(exc)}), 502
+
+
 @app.route("/event_media/<cam_id>/<media_type>/<path:filename>")
 def event_media(cam_id, media_type, filename):
     """Proxy saved event images/videos from the remote Traffic AI server."""
