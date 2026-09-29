@@ -1,12 +1,10 @@
 from flask import Flask, render_template, Response, request, jsonify
 from pathlib import Path
-import threading
-import time
-
-import cv2
-import numpy as np
+import os
+import requests
 
 BASE_DIR = Path(__file__).resolve().parent
+
 app = Flask(
     __name__,
     template_folder=str(BASE_DIR / "mini-project-site" / "html"),
@@ -15,9 +13,8 @@ app = Flask(
 )
 
 CAMERAS = ("cam1", "cam2")
-frame_lock = threading.Lock()
-latest_frames = {cam: None for cam in CAMERAS}
-last_seen = {cam: None for cam in CAMERAS}
+AI_SERVER_BASE = os.environ.get("AI_SERVER_BASE", "http://192.168.2.100:5000").rstrip("/")
+HTTP_TIMEOUT = 3
 
 
 @app.route("/")
@@ -37,67 +34,98 @@ def control():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({
+        "status": "ok",
+        "ai_server": AI_SERVER_BASE,
+    })
 
 
-@app.route("/upload_frame", methods=["POST"])
-def upload_frame():
-    cam_id = request.args.get("cam_id", "cam1")
-    if cam_id not in CAMERAS:
-        return jsonify({"ok": False, "error": "unknown camera"}), 400
-
-    data = request.get_data()
-    image = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
-    if image is None:
-        return jsonify({"ok": False, "error": "invalid jpeg"}), 400
-
-    with frame_lock:
-        latest_frames[cam_id] = image
-        last_seen[cam_id] = time.time()
-
-    return jsonify({"ok": True, "cam_id": cam_id})
-
-
-def mjpeg(cam_id):
-    while True:
-        with frame_lock:
-            frame = None if latest_frames[cam_id] is None else latest_frames[cam_id].copy()
-
-        if frame is None:
-            blank = np.zeros((240, 320, 3), dtype=np.uint8)
-            cv2.putText(blank, "WAITING FOR CAMERA", (35, 120),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
-            frame = blank
-
-        ok, encoded = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
-        if ok:
-            yield (b"--frame\r\n"
-                   b"Content-Type: image/jpeg\r\n\r\n" +
-                   encoded.tobytes() + b"\r\n")
-        time.sleep(0.04)
+def _valid_camera(cam_id):
+    return cam_id in CAMERAS
 
 
 @app.route("/video_feed")
 def video_feed():
+    """Proxy the processed MJPEG stream from the remote Traffic AI server."""
     cam_id = request.args.get("cam_id", "cam1")
-    if cam_id not in CAMERAS:
+    if not _valid_camera(cam_id):
         return "unknown camera", 404
-    return Response(mjpeg(cam_id), mimetype="multipart/x-mixed-replace; boundary=frame")
+
+    upstream_url = f"{AI_SERVER_BASE}/video_feed"
+    try:
+        upstream = requests.get(
+            upstream_url,
+            params={"cam_id": cam_id},
+            stream=True,
+            timeout=(HTTP_TIMEOUT, None),
+        )
+        upstream.raise_for_status()
+    except requests.RequestException as exc:
+        return f"AI camera server unavailable: {exc}", 502
+
+    content_type = upstream.headers.get(
+        "Content-Type",
+        "multipart/x-mixed-replace; boundary=frame",
+    )
+
+    def generate():
+        try:
+            for chunk in upstream.iter_content(chunk_size=64 * 1024):
+                if chunk:
+                    yield chunk
+        finally:
+            upstream.close()
+
+    return Response(
+        generate(),
+        content_type=content_type,
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate"},
+    )
 
 
 @app.route("/camera_status")
 def camera_status():
-    now = time.time()
+    """Translate the remote AI server debug status into dashboard camera state."""
+    try:
+        response = requests.get(f"{AI_SERVER_BASE}/debug_status", timeout=HTTP_TIMEOUT)
+        response.raise_for_status()
+        remote = response.json()
+    except (requests.RequestException, ValueError):
+        return jsonify({
+            cam: {"connected": False, "last_seen_seconds": None}
+            for cam in CAMERAS
+        }), 200
+
     result = {}
-    with frame_lock:
-        for cam in CAMERAS:
-            seen = last_seen[cam]
-            result[cam] = {
-                "connected": seen is not None and now - seen < 5,
-                "last_seen_seconds": None if seen is None else round(now - seen, 2),
-            }
+    for cam in CAMERAS:
+        info = remote.get(cam, {}) if isinstance(remote, dict) else {}
+        # The AI server reports frame shapes after receiving/processing a frame.
+        connected = bool(info.get("raw_shape") or info.get("normalized_shape"))
+        result[cam] = {
+            "connected": connected,
+            "last_seen_seconds": None,
+            "detections": info.get("detections", 0),
+            "tracked": info.get("tracked", 0),
+            "last_error": info.get("last_error", ""),
+        }
     return jsonify(result)
 
 
+@app.route("/ai_status")
+def ai_status():
+    """Expose the remote debug payload for dashboard diagnostics."""
+    try:
+        response = requests.get(f"{AI_SERVER_BASE}/debug_status", timeout=HTTP_TIMEOUT)
+        response.raise_for_status()
+        return Response(
+            response.content,
+            status=response.status_code,
+            content_type=response.headers.get("Content-Type", "application/json"),
+        )
+    except requests.RequestException as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 502
+
+
 if __name__ == "__main__":
+    print(f"Dashboard -> Traffic AI server: {AI_SERVER_BASE}")
     app.run(host="0.0.0.0", port=5000, threaded=True, debug=True)
