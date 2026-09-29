@@ -1,5 +1,4 @@
-/* 대시보드: 로컬 매체 미리보기와 예시 탐지 기록.
-   실제 탐지 결과는 이후 서버 API 연결 시 이 예시 데이터 대신 공급합니다. */
+/* 교통 탭은 실제 AI 이벤트, 낙하물 탭은 기능 확인용 예시를 표시합니다. */
 (function () {
   'use strict';
 
@@ -17,6 +16,10 @@
     ]
   };
   var records = structuredClone(initial);
+  try {
+    var savedTraffic = JSON.parse(localStorage.getItem('traffic-ai-events') || '[]');
+    if (Array.isArray(savedTraffic)) records.traffic = savedTraffic.slice(0, 100);
+  } catch (error) { /* 저장 기록이 손상되면 빈 기록으로 시작 */ }
   var trafficStreamStarted = false;
   var view = 'traffic';
   var next = { traffic: 0, objects: 0 };
@@ -57,6 +60,7 @@
         if (allowed.indexOf(String(alert.type || '')) === -1) return;
         records.traffic.unshift(mapTrafficAlert(alert));
         if (records.traffic.length > 100) records.traffic.length = 100;
+        try { localStorage.setItem('traffic-ai-events', JSON.stringify(records.traffic)); } catch (error) { /* 저장 실패 시 실시간 표시는 유지 */ }
         if (view === 'traffic') render();
       } catch (error) {
         console.error('탐지 이벤트 처리 실패', error);
@@ -133,7 +137,7 @@
 
   function fillTypeFilter() {
     var options = view === 'traffic'
-      ? [['all', '전체 유형'], ['parking', '주정차'], ['wrongway', '역주행']]
+      ? [['all', '전체 유형'], ['parking', '주정차'], ['wrongway', '역주행'], ['accident', '사고 및 위험'], ['danger', '위험 상황']]
       : [['all', '전체 유형'], ['wood', '목재'], ['box', '상자'], ['pet', '페트병']];
     if ($('type-filter').options.length === options.length && $('type-filter').options[1].value === options[1][0]) return;
     $('type-filter').replaceChildren.apply($('type-filter'), options.map(function (pair) { return new Option(pair[1], pair[0]); }));
@@ -237,18 +241,22 @@
     $('detection-count').textContent = events.length + '건' + (view === 'traffic' ? '' : ' · 예시');
     $('latest-event').textContent = events.length ? labels[events[0].type] + (view === 'traffic' ? '' : ' · 예시') : '없음';
     $('source-label').textContent = view === 'traffic' ? '연결된 카메라' : '선택한 매체';
-    $('source-count').innerHTML = view === 'traffic' ? '0 <small>/ 2대</small>' : (media ? '1 <small>개</small>' : '0 <small>개</small>');
-    $('system-state').textContent = view === 'traffic' ? '연결 대기' : (media ? '매체 확인 중' : '매체 대기');
+    if (view === 'objects') {
+      $('source-count').innerHTML = media ? '1 <small>개</small>' : '0 <small>개</small>';
+      $('system-state').textContent = media ? '매체 확인 중' : '매체 대기';
+    }
     $('dash-subtitle').textContent = view === 'traffic' ? '카메라 2대 · 주정차 및 역주행' : '영상 링크 또는 사진·영상 파일 · 낙하물 대시보드';
     $('monitor-title').textContent = view === 'traffic' ? '카메라 화면' : '영상·사진 확인';
-    $('monitor-status').textContent = view === 'traffic' ? '라즈베리 파이 연결 전' : '자동 탐지 모델 연결 전';
+    if (view === 'objects') $('monitor-status').textContent = '자동 탐지 모델 연결 전';
     $('traffic-view').hidden = view !== 'traffic';
     $('objects-view').hidden = view !== 'objects';
     $('camera-filter').hidden = view !== 'traffic';
     $('criteria-title').textContent = view === 'traffic' ? '주정차·역주행 판정' : '낙하물 탐지 클래스';
     $('criteria-copy').innerHTML = view === 'traffic'
-      ? '주정차는 지정 구역의 정차 지속 시간, 역주행은 차량 이동 방향을 기준으로 판정할 예정입니다. 실제 판정 기준은 모델 연결 단계에서 확정합니다.'
+      ? '실제 AI 서버 판정 결과를 표시합니다. 주정차는 지정 ROI 내 정차 지속 시간, 역주행은 START/END 게이트 통과 방향을 기준으로 판정합니다.'
       : '최종 모델의 탐지 대상입니다.<div class="criteria-tags"><span>wood · 목재</span><span>box · 상자</span><span>pet · 페트병</span></div>';
+    $('add-demo').hidden = view === 'traffic';
+    $('reset-demo').hidden = view === 'traffic';
     document.querySelectorAll('.dash-tab').forEach(function (tab) {
       var selected = tab.dataset.view === view;
       tab.setAttribute('aria-selected', String(selected));
@@ -375,8 +383,13 @@
     render();
   });
   $('reset-demo').addEventListener('click', function () {
-    records = structuredClone(initial);
-    next = { traffic: 0, objects: 0 };
+    if (view === 'traffic') {
+      records.traffic = [];
+      try { localStorage.removeItem('traffic-ai-events'); } catch (error) {}
+    } else {
+      records.objects = structuredClone(initial.objects);
+    }
+    next[view] = 0;
     $('camera-filter').value = 'all';
     $('type-filter').value = 'all';
     render();
